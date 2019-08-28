@@ -1,0 +1,7 @@
+Grading at 08/28/2019:01:23:47.830669
+For commit ID ad894692600a8617c7dcb2e0038816506e415c54
+Grading at Tue Aug 27 21:23:47 EDT 2019
+Reading your quiz answers from answers.txt
+You have 4 wrong answers
+
+Overall Grade: FAILED
