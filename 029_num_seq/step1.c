@@ -40,23 +40,23 @@ int main(void) {
   // Test printSeq1range
   int low = 0;
   int high = 4;
-  printf("printSeq1range(%d,%d)\n", low, high);
+  printf("printSeq1range(%d, %d)\n", low, high);
   printSeq1Range(low, high);
   low = -2;
   high = 6;
-  printf("printSeq1range(%d,%d)\n", low, high);
+  printf("printSeq1range(%d, %d)\n", low, high);
   printSeq1Range(low, high);
   low = 7;
   high = 3;
-  printf("printSeq1range(%d,%d)\n", low, high);
+  printf("printSeq1range(%d, %d)\n", low, high);
   printSeq1Range(low, high);
   low = 0;
   high = 0;
-  printf("printSeq1range(%d,%d)\n", low, high);
+  printf("printSeq1range(%d, %d)\n", low, high);
   printSeq1Range(low, high);
   low = -79;
   high = 102;
-  printf("printSeq1range(%d,%d)\n", low, high);
+  printf("printSeq1range(%d, %d)\n", low, high);
   printSeq1Range(low, high);
 
   return EXIT_SUCCESS;
