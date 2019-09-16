@@ -1,4 +1,4 @@
-step2: step2.o
-	gcc -o step2 step2.o
-step2.o: step2.c
-	gcc -std=gnu99 -pedantic -Wall -c step2.c
+step3: step3.o
+	gcc -o step3 step3.o
+step3.o: step3.c
+	gcc -std=gnu99 -pedantic -Wall -c step3.c
