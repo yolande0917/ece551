@@ -5,6 +5,9 @@
 void reverse(char * str) {
   //WRITE ME!
 
+  if (str == NULL) {
+    return;
+  }
   // calculate size
   size_t size = 1;
   int i = 0;
