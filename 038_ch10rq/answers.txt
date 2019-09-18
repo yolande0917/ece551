@@ -2,7 +2,7 @@ E
 E
 A
 D
-E
+D
 D
 G
 J
@@ -13,6 +13,6 @@ B
 A
 D
 C
-B
+D
 C
 C
