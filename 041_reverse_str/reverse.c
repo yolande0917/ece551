@@ -12,6 +12,9 @@ void reverse(char * str) {
     size++;
     i++;
   }
+  if (size <= 2) {
+    return;
+  }
   // copy the string to array
   char array[size];
   char * ptr = array;
