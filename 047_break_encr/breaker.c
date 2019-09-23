@@ -12,6 +12,10 @@ size_t sizeOfChars(FILE * f) {
       n++;
     }
   }
+  if (n == 0) {
+    fprintf(stderr, "There is no char in the input file.\n");
+    exit(EXIT_FAILURE);
+  }
   return n;
 }
 
@@ -28,8 +32,6 @@ int findMax(int * array, size_t n) {
 }
 
 int findMaxFreqIndex(FILE * f, char * chars, int * freq, size_t n) {
-  int ind = 0;
-
   int c;
   int i = 0;
   while ((c = fgetc(f)) != EOF) {
@@ -48,11 +50,11 @@ int findMaxFreqIndex(FILE * f, char * chars, int * freq, size_t n) {
       if (*(chars + k) == current) {
         count++;
       }
-      *(freq + j) = count;
     }
+    *(freq + j) = count;
   }
   // find max index
-  ind = findMax(freq, n);
+  int ind = findMax(freq, n);
   return ind;
 }
 
