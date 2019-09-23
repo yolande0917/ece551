@@ -1,0 +1,17 @@
+Grading at 09/23/2019:17:43:20.839702
+For commit ID 3b0784042bf22b9d462977b2408690de8786035c
+Grading at Mon Sep 23 13:43:17 EDT 2019
+Attempting to compile breaker.c 
+make: 'breaker' is up to date.
+testcase1 passed
+#################################################
+testcase2:
+testcase2 failed
+#################################################
+testcase3:
+testcase3 failed
+#################################################
+testcase4:
+valgrind reported memory errors or your program ran too long
+
+Overall Grade: F
