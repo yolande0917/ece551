@@ -12,6 +12,10 @@ int findMax(int * array, size_t n) {
       ind = i;
     }
   }
+  if (max <= 1) {
+    fprintf(stderr, "Too little alphabetical in the input file.\n");
+    exit(EXIT_FAILURE);
+  }
   return ind;
 }
 
@@ -105,6 +109,8 @@ int main(int argc, char ** argv) {
   char c = alpha[ind];
 
   // calculate key
+  // c -= 'a';
+  // int key = (c-('e'-'a')+26)%26;
   int key = ((c - 'e') + 26) % 26;
 
   printf("The key is %d.\n", key);
