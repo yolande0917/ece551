@@ -1,6 +1,6 @@
-Grading at 09/23/2019:17:43:20.839702
-For commit ID 3b0784042bf22b9d462977b2408690de8786035c
-Grading at Mon Sep 23 13:43:17 EDT 2019
+Grading at 09/23/2019:18:00:32.786649
+For commit ID bfde6bc327cf8d2e949ad6fb78e340301d3321b4
+Grading at Mon Sep 23 14:00:29 EDT 2019
 Attempting to compile breaker.c 
 make: 'breaker' is up to date.
 testcase1 passed
@@ -13,5 +13,50 @@ testcase3 failed
 #################################################
 testcase4:
 valgrind reported memory errors or your program ran too long
+==6400== Memcheck, a memory error detector
+==6400== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==6400== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==6400== Command: ./breaker input3.txt
+==6400== Parent PID: 6399
+==6400== 
+==6400== Warning: client switching stacks?  SP change: 0x1fff000ab0 --> 0x1ffe68abc0
+==6400==          to suppress, use: --max-stackframe=9920240 or greater
+==6400== Warning: client switching stacks?  SP change: 0x1ffe68abc0 --> 0x1ffc0b3010
+==6400==          to suppress, use: --max-stackframe=39680944 or greater
+==6400== Invalid write of size 8
+==6400==    at 0x108CA8: main (in /home/ece551db/graderbase/work/jx94.047_break_encr.te50jM/breaker)
+==6400==  Address 0x1ffc0b3008 is on thread 1's stack
+==6400== 
+==6400== 
+==6400== Process terminating with default action of signal 11 (SIGSEGV)
+==6400==  Access not within mapped region at address 0x1FFC0B3008
+==6400==    at 0x108CA8: main (in /home/ece551db/graderbase/work/jx94.047_break_encr.te50jM/breaker)
+==6400==  If you believe this happened as a result of a stack
+==6400==  overflow in your program's main thread (unlikely but
+==6400==  possible), you can try to increase the size of the
+==6400==  main thread stack using the --main-stacksize= flag.
+==6400==  The main thread stack size used in this run was 8388608.
+==6400== Invalid write of size 8
+==6400==    at 0x4A2A650: _vgnU_freeres (in /usr/lib/valgrind/vgpreload_core-amd64-linux.so)
+==6400==  Address 0x1ffc0b3000 is on thread 1's stack
+==6400== 
+==6400== 
+==6400== Process terminating with default action of signal 11 (SIGSEGV)
+==6400==  Access not within mapped region at address 0x1FFC0B3000
+==6400==    at 0x4A2A650: _vgnU_freeres (in /usr/lib/valgrind/vgpreload_core-amd64-linux.so)
+==6400==  If you believe this happened as a result of a stack
+==6400==  overflow in your program's main thread (unlikely but
+==6400==  possible), you can try to increase the size of the
+==6400==  main thread stack using the --main-stacksize= flag.
+==6400==  The main thread stack size used in this run was 8388608.
+==6400== 
+==6400== HEAP SUMMARY:
+==6400==     in use at exit: 0 bytes in 0 blocks
+==6400==   total heap usage: 2 allocs, 2 frees, 4,648 bytes allocated
+==6400== 
+==6400== For a detailed leak analysis, rerun with: --leak-check=full
+==6400== 
+==6400== For counts of detected and suppressed errors, rerun with: -v
+==6400== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
 
 Overall Grade: F
