@@ -16,6 +16,14 @@ int findMax(int * array, size_t n) {
     fprintf(stderr, "Too little alphabetical in the input file.\n");
     exit(EXIT_FAILURE);
   }
+
+  for (int j = 0; j < (int)n; j++) {
+    if ((*(array + j) == max) && j != ind) {
+      fprintf(stderr, "Multiple alphabetics have max frequency.\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+  // printf("The maximum frequency is %d.\n", max);
   return ind;
 }
 
@@ -107,13 +115,12 @@ int main(int argc, char ** argv) {
   }
 
   char c = alpha[ind];
+  // printf("The mostly appeared char is %c.\n", c);
 
   // calculate key
-  // c -= 'a';
-  // int key = (c-('e'-'a')+26)%26;
   int key = ((c - 'e') + 26) % 26;
 
-  printf("The key is %d.\n", key);
+  printf("%d\n", key);
 
   /**
   size_t n = sizeOfChars(f);
