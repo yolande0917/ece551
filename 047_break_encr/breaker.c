@@ -36,7 +36,7 @@ int findMaxFreqIndex(FILE * f, char * chars, int * freq, size_t n) {
   int i = 0;
   while ((c = fgetc(f)) != EOF) {
     if (isalpha(c)) {
-      *(chars + i) = c;
+      *(chars + i) = tolower(c);
       i++;
     }
   }
@@ -79,14 +79,14 @@ int main(int argc, char ** argv) {
   char context[n];
   int freq[n];
 
-  f = fopen(argv[1], "r");
-  if (f == NULL) {
+  FILE * fl = fopen(argv[1], "r");
+  if (fl == NULL) {
     fprintf(stderr, "Failed to open file.\n");
     return EXIT_FAILURE;
   }
 
-  int maxInd = findMaxFreqIndex(f, context, freq, n);
-  if (fclose(f) != 0) {
+  int maxInd = findMaxFreqIndex(fl, context, freq, n);
+  if (fclose(fl) != 0) {
     fprintf(stderr, "Failed to close the input file.\n");
     return EXIT_FAILURE;
   }
