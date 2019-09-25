@@ -1,0 +1,20 @@
+Grading at 09/25/2019:20:39:13.970943
+For commit ID 589d716e7ad74e2e420b7934f43f4356ca45a5db
+Grading at Wed Sep 25 16:39:09 EDT 2019
+Attempting to compile sortLines.c
+#################################################
+testcase1:
+testcase1 passed, your program successfully indicated a failure
+  - Valgrind was clean (no errors, no memory leaks)
+valgrind was clean
+#################################################
+testcase2:
+Your output is incorrect
+#################################################
+testcase3:
+Your output is incorrect
+#################################################
+testcase4:
+Your output is incorrect
+
+Overall Grade: F
