@@ -21,7 +21,7 @@ void sortData(char ** data, size_t count) {
   }
 }
 
-size_t readLinesFromFile(char *** lines, FILE * f) {
+void readLinesFromFile(char *** lines, FILE * f) {
   size_t i = 0;
   char * curr = NULL;
   size_t linecap = 0;
@@ -34,14 +34,13 @@ size_t readLinesFromFile(char *** lines, FILE * f) {
   free(curr);
 
   sortData(*lines, i);
-  return i;
 }
 
 int main(int argc, char ** argv) {
   //WRITE YOUR CODE HERE!
   FILE * f;
   char ** lines = NULL;
-  size_t count;
+  //  size_t count;
   // read from stdin if argc=1
   if (argc == 1) {
     f = fdopen(0, "r");
@@ -52,8 +51,8 @@ int main(int argc, char ** argv) {
 
     // read from the file
     // and sort the lines within the function
-    count = readLinesFromFile(&lines, f);
-    printf("%lu\n", count);
+    readLinesFromFile(&lines, f);
+    //    printf("%lu\n", count);
 
     // close the file
     if (fclose(f) != 0) {
@@ -73,8 +72,8 @@ int main(int argc, char ** argv) {
 
       // read from the file
       // and sort the lines within the function
-      count = readLinesFromFile(&lines, f);
-      printf("%lu\n", count);
+      readLinesFromFile(&lines, f);
+      // printf("%lu\n", count);
 
       free(lines);
       lines = NULL;
