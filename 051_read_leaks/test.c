@@ -21,7 +21,5 @@ int main(void) {
   p = q;
   free(q);
   q = NULL;
-  // free(q);
-
   return EXIT_SUCCESS;
 }
