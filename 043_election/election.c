@@ -113,7 +113,20 @@ unsigned int countElectoralVotes(state_t * stateData,
                                  uint64_t * voteCounts,
                                  size_t nStates) {
   //STEP 2: write me
-  return 0;
+  // check if any of the input pointers is NULL
+  if (stateData == NULL || voteCounts == NULL) {
+    exitError("Invalid input pointers.");
+  }
+  unsigned int totalElectoralVotes = 0;
+  // iterate through every elements in arrays
+  for (size_t i = 0; i < nStates; i++) {
+    // calculate the votes/population of each state
+    if ((long double)voteCounts[i] / stateData[i].population > 0.5) {
+      // add the electoralVotes to total counts if larger than 0.5
+      totalElectoralVotes += stateData[i].electoralVotes;
+    }
+  }
+  return totalElectoralVotes;
 }
 
 void printRecounts(state_t * stateData, uint64_t * voteCounts, size_t nStates) {
