@@ -39,9 +39,9 @@ state_t parseLine(const char * line) {
 
   // read char until reaches the first ':'
   while (*line != ':') {
-    // check if the char is an alphabet or space
-    if (!isalpha(*line) && (*line != ' ')) {
-      exitError("Invalid state name.");
+    // check if the string ends before the first ':'
+    if (*line == '\0') {
+      exitError("String lacks information.");
     }
     // check if the state name is too long
     if (count >= MAX_STATE_NAME_LENGTH - 2) {
@@ -51,14 +51,6 @@ state_t parseLine(const char * line) {
     state.name[count] = *line;
     count++;
     line++;
-  }
-  // check is the state name is empty
-  if (count == 0) {
-    exitError("No chars for state name.");
-  }
-  // check if the state name starts or ends with space
-  if (state.name[0] == ' ' || state.name[count - 1] == ' ') {
-    exitError("The state name start or ends with space.");
   }
   // null terminated the string
   state.name[count] = '\0';
