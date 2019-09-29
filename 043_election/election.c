@@ -4,10 +4,18 @@
 #include <stdio.h>
 #include <string.h>
 
+/*************
+Takes in the votes of the candidate and the population of the state
+and calculate the percentage of votes he gets from the state
+ */
+double calculatePercentage(uint64_t votes, uint64_t population) {
+  return (double)votes / population * 100;
+}
+
 /***********
 Takes a string parameter as the error message,
 print out the message to stderr and exit.
-*/
+ */
 void exitError(const char * str) {
   fprintf(stderr, "%s\n", str);
   exit(EXIT_FAILURE);
@@ -109,6 +117,10 @@ state_t parseLine(const char * line) {
   return state;
 }
 
+/****************
+Takes in an array of state_t and votecounts of the candidate 
+of each state and the size, calculate the total electoral votes
+ */
 unsigned int countElectoralVotes(state_t * stateData,
                                  uint64_t * voteCounts,
                                  size_t nStates) {
@@ -118,11 +130,13 @@ unsigned int countElectoralVotes(state_t * stateData,
     exitError("Invalid input pointers.");
   }
   unsigned int totalElectoralVotes = 0;
+  double percentage;
   // iterate through every elements in arrays
   for (size_t i = 0; i < nStates; i++) {
     // calculate the votes/population of each state
-    if ((long double)voteCounts[i] / stateData[i].population > 0.5) {
-      // add the electoralVotes to total counts if larger than 0.5
+    percentage = calculatePercentage(voteCounts[i], stateData[i].population);
+    if (percentage > 50) {
+      // add the electoralVotes to total counts if the votes percentage exceeds 50%
       totalElectoralVotes += stateData[i].electoralVotes;
     }
   }
@@ -131,6 +145,22 @@ unsigned int countElectoralVotes(state_t * stateData,
 
 void printRecounts(state_t * stateData, uint64_t * voteCounts, size_t nStates) {
   //STEP 3: write me
+  // check if any of the input pointers is NULL
+  if (stateData == NULL || voteCounts == NULL) {
+    exitError("Invalid input pointers.");
+  }
+  double percentage;
+  // iterate through every elements in arrays
+  for (size_t i = 0; i < nStates; i++) {
+    // calculate the votes/population of each state
+    percentage = calculatePercentage(voteCounts[i], stateData[i].population);
+    // if the vote percentage is within +/-0.5% away from 50%, print out
+    if (percentage >= 49.5 && percentage <= 50.5) {
+      printf("%s requires a recount (Candidate A has %.2f%% of the vote)\n",
+             stateData[i].name,
+             percentage);
+    }
+  }
 }
 
 void printLargestWin(state_t * stateData, uint64_t * voteCounts, size_t nStates) {
