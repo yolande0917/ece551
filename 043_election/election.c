@@ -143,6 +143,10 @@ unsigned int countElectoralVotes(state_t * stateData,
   return totalElectoralVotes;
 }
 
+/********
+Takes in an array of state_t and votecounts of the candidate 
+of each state and the size, print out if needs to recount for each state
+ */
 void printRecounts(state_t * stateData, uint64_t * voteCounts, size_t nStates) {
   //STEP 3: write me
   // check if any of the input pointers is NULL
@@ -163,6 +167,29 @@ void printRecounts(state_t * stateData, uint64_t * voteCounts, size_t nStates) {
   }
 }
 
+/**********
+Takes in an array of state_t and votecounts of the candidate 
+of each state and the size, prints out in which state candidate A won
+the largest percentage of vote.
+ */
 void printLargestWin(state_t * stateData, uint64_t * voteCounts, size_t nStates) {
   //STEP 4: write me
+  // check if any of the input pointers is NULL
+  if (stateData == NULL || voteCounts == NULL) {
+    exitError("Invalid input pointers.");
+  }
+  double percentage;
+  double max = 0;
+  size_t ind = 0;
+  // iterate through every elements in arrays
+  for (size_t i = 0; i < nStates; i++) {
+    // calculate the votes/population of each state
+    percentage = calculatePercentage(voteCounts[i], stateData[i].population);
+    // find the max percentage of votes
+    if (percentage > max) {
+      max = percentage;
+      ind = i;
+    }
+  }
+  printf("Candidate A won %s with %.2f%% of the vote\n", stateData[ind].name, max);
 }
