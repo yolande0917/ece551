@@ -87,6 +87,10 @@ kvarray_t * readKVs(const char * fname) {
   kvarray->length = count;
   free(buffer);
 
+  if (fclose(f) != 0) {
+    fprintf(stderr, "Failed to close the file.\n");
+    exit(EXIT_FAILURE);
+  }
   return kvarray;
 }
 
