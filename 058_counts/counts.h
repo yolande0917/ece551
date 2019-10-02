@@ -18,6 +18,7 @@ struct _counts_t {
 };
 typedef struct _counts_t counts_t;
 
+int checkNameInd(counts_t * c, const char * name);
 counts_t * createCounts(void);
 void addCount(counts_t * c, const char * name);
 void printCounts(counts_t * c, FILE * outFile);
