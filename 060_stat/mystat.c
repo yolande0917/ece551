@@ -124,13 +124,16 @@ int main(int argc, char * argv[]) {
     exit(EXIT_FAILURE);
   }
   // step 1
+  // print line 1
   printf("  File: ‘%s’\n", argv[1]);
   char * filetype = findFileType(st);
+  // print line 2
   printf("  Size: %-10lu\tBlocks: %-10lu IO Block: %-6lu %s\n",
          st.st_size,
          st.st_blocks,
          st.st_blksize,
          filetype);
+  // print line 3
   printf("Device: %lxh/%lud\tInode: %-10lu  Links: %lu\n",
          st.st_dev,
          st.st_dev,
@@ -140,7 +143,27 @@ int main(int argc, char * argv[]) {
   char permissiondesc[11];
   char * ptr = permissiondesc;
   findPermissionDescription(st, &ptr);
-  printf("Access: (%04o/%s)\n", st.st_mode & ~S_IFMT, permissiondesc);
+  // step 3
+  uid_t uid = st.st_uid;
+  gid_t gid = st.st_gid;
+  struct passwd * pwd = getpwuid(uid);
+  if (pwd == NULL) {
+    perror("getpwuid");
+    exit(EXIT_FAILURE);
+  }
+  struct group * grp = getgrgid(gid);
+  if (grp == NULL) {
+    perror("getgrgid");
+    exit(EXIT_FAILURE);
+  }
+  // print line 4
+  printf("Access: (%04o/%s)  Uid: (%5d/%8s)   Gid: (%5d/%8s)\n",
+         st.st_mode & ~S_IFMT,
+         permissiondesc,
+         uid,
+         pwd->pw_name,
+         gid,
+         grp->gr_name);
 
   return EXIT_SUCCESS;
 }
