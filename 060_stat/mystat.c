@@ -111,21 +111,12 @@ char * time2str(const time_t * when, long ns) {
   return ans;
 }
 
-int main(int argc, char * argv[]) {
-  // check if have correct args number
-  if (argc != 2) {
-    fprintf(stderr, "Usage case: ./mystat pathname\n");
-    exit(EXIT_FAILURE);
-  }
-  // create a stat to store file information
-  struct stat st;
-  if (lstat(argv[1], &st) == -1) {
-    perror("lstat");
-    exit(EXIT_FAILURE);
-  }
-  // step 1
-  // print line 1
-  printf("  File: ‘%s’\n", argv[1]);
+// step 5
+/***********
+print out information of the given stat struct,
+starting from line 2. line 1 is printed in the main.
+ */
+void printStatInfo(struct stat st) {
   char * filetype = findFileType(st);
   // print line 2
   printf("  Size: %-10lu\tBlocks: %-10lu IO Block: %-6lu %s\n",
@@ -179,6 +170,28 @@ int main(int argc, char * argv[]) {
   free(timestr);
   // print last line
   printf(" Birth: -\n");
+}
+
+int main(int argc, char * argv[]) {
+  // check if have correct args number
+  if (argc < 2) {
+    fprintf(stderr, "Usage case: ./mystat pathname\n");
+    exit(EXIT_FAILURE);
+  }
+  // create a stat to store file information
+  struct stat st;
+  // iterate through every pathname
+  for (int i = 1; i < argc; i++) {
+    if (lstat(argv[i], &st) == -1) {
+      perror("lstat");
+      exit(EXIT_FAILURE);
+    }
+    // step 1
+    // print line 1
+    printf("  File: ‘%s’\n", argv[1]);
+    // print the rest of lines
+    printStatInfo(st);
+  }
 
   return EXIT_SUCCESS;
 }
