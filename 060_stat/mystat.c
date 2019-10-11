@@ -9,6 +9,41 @@
 #include <time.h>
 #include <unistd.h>
 
+/**************
+Given a stat struct, find the first char of
+its human readable description of the permissions
+ */
+char findFstCInPermission(struct stat st) {
+  char c;
+  switch (st.st_mode & S_IFMT) {
+    case S_IFBLK:
+      c = 'b';
+      break;
+    case S_IFCHR:
+      c = 'c';
+      break;
+    case S_IFDIR:
+      c = 'd';
+      break;
+    case S_IFIFO:
+      c = 'p';
+      break;
+    case S_IFLNK:
+      c = 'l';
+      break;
+    case S_IFREG:
+      c = '-';
+      break;
+    case S_IFSOCK:
+      c = 's';
+      break;
+    default:
+      c = '?';
+      break;
+  }
+  return c;
+}
+
 /***********
 Given a stat struct, find its file type information
  */
@@ -41,6 +76,27 @@ char * findFileType(struct stat st) {
       break;
   }
   return str;
+}
+
+/**************
+Given a stat struct and a pointer to a string of length 11,
+write human readable description to the given string
+ */
+void findPermissionDescription(struct stat st, char ** ptr) {
+  char * str = *ptr;
+  // null terminated the string
+  str[10] = '\0';
+  // fill in str
+  str[0] = findFstCInPermission(st);
+  str[1] = st.st_mode & S_IRUSR ? 'r' : '-';
+  str[2] = st.st_mode & S_IWUSR ? 'w' : '-';
+  str[3] = st.st_mode & S_IXUSR ? 'x' : '-';
+  str[4] = st.st_mode & S_IRGRP ? 'r' : '-';
+  str[5] = st.st_mode & S_IWGRP ? 'w' : '-';
+  str[6] = st.st_mode & S_IXGRP ? 'x' : '-';
+  str[7] = st.st_mode & S_IROTH ? 'r' : '-';
+  str[8] = st.st_mode & S_IWOTH ? 'w' : '-';
+  str[9] = st.st_mode & S_IXOTH ? 'x' : '-';
 }
 
 //This function is for Step 4
@@ -80,6 +136,11 @@ int main(int argc, char * argv[]) {
          st.st_dev,
          st.st_ino,
          st.st_nlink);
+  // step 2
+  char permissiondesc[11];
+  char * ptr = permissiondesc;
+  findPermissionDescription(st, &ptr);
+  printf("Access: (%04o/%s)\n", st.st_mode & ~S_IFMT, permissiondesc);
 
   return EXIT_SUCCESS;
 }
