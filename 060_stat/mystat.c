@@ -125,11 +125,23 @@ void printStatInfo(struct stat st) {
          st.st_blksize,
          filetype);
   // print line 3
-  printf("Device: %lxh/%lud\tInode: %-10lu  Links: %lu\n",
-         st.st_dev,
-         st.st_dev,
-         st.st_ino,
-         st.st_nlink);
+  // step 6
+  if (S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode)) {
+    printf("Device: %lxh/%lud\tInode: %-10lu  Links: %-5lu Device type: %d,%d\n",
+           st.st_dev,
+           st.st_dev,
+           st.st_ino,
+           st.st_nlink,
+           major(st.st_rdev),
+           minor(st.st_rdev));
+  }
+  else {
+    printf("Device: %lxh/%lud\tInode: %-10lu  Links: %lu\n",
+           st.st_dev,
+           st.st_dev,
+           st.st_ino,
+           st.st_nlink);
+  }
   // step 2
   char permissiondesc[11];
   char * ptr = permissiondesc;
@@ -188,7 +200,7 @@ int main(int argc, char * argv[]) {
     }
     // step 1
     // print line 1
-    printf("  File: ‘%s’\n", argv[1]);
+    printf("  File: %s\n", argv[1]);
     // print the rest of lines
     printStatInfo(st);
   }
