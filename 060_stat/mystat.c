@@ -164,6 +164,21 @@ int main(int argc, char * argv[]) {
          pwd->pw_name,
          gid,
          grp->gr_name);
+  // step 4
+  // extract access time, print and free
+  char * timestr = time2str(&st.st_atime, st.st_atim.tv_nsec);
+  printf("Access: %s\n", timestr);
+  free(timestr);
+  // extract modify time, print and free
+  timestr = time2str(&st.st_mtime, st.st_mtim.tv_nsec);
+  printf("Modify: %s\n", timestr);
+  free(timestr);
+  // extract change time, print and free
+  timestr = time2str(&st.st_ctime, st.st_ctim.tv_nsec);
+  printf("Change: %s\n", timestr);
+  free(timestr);
+  // print last line
+  printf(" Birth: -\n");
 
   return EXIT_SUCCESS;
 }
