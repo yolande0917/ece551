@@ -113,10 +113,26 @@ char * time2str(const time_t * when, long ns) {
 
 // step 5
 /***********
-print out information of the given stat struct,
-starting from line 2. line 1 is printed in the main.
+print out information of the given stat struct.
  */
-void printStatInfo(struct stat st) {
+void printStatInfo(struct stat st, char * path) {
+  // print line 1
+  // step 7, check if the path is symbolic link
+  if (S_ISLNK(st.st_mode)) {
+    char linktarget[256];
+    ssize_t len = readlink(path, linktarget, 256);
+    if (len < 0) {
+      perror("readlink");
+      exit(EXIT_FAILURE);
+    }
+    linktarget[len] = '\0';
+    printf("  File: %s -> %s\n", path, linktarget);
+  }
+  // step 1, if not symbolic link, do regular print
+  else {
+    printf("  File: %s\n", path);
+  }
+  // call function to find the file type
   char * filetype = findFileType(st);
   // print line 2
   printf("  Size: %-10lu\tBlocks: %-10lu IO Block: %-6lu %s\n",
@@ -125,7 +141,7 @@ void printStatInfo(struct stat st) {
          st.st_blksize,
          filetype);
   // print line 3
-  // step 6
+  // step 6, check if the file is a device
   if (S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode)) {
     printf("Device: %lxh/%lud\tInode: %-10lu  Links: %-5lu Device type: %d,%d\n",
            st.st_dev,
@@ -135,6 +151,7 @@ void printStatInfo(struct stat st) {
            major(st.st_rdev),
            minor(st.st_rdev));
   }
+  // if not a device, print regularly
   else {
     printf("Device: %lxh/%lud\tInode: %-10lu  Links: %lu\n",
            st.st_dev,
@@ -142,11 +159,11 @@ void printStatInfo(struct stat st) {
            st.st_ino,
            st.st_nlink);
   }
-  // step 2
+  // step 2, call function to generate the permission description
   char permissiondesc[11];
   char * ptr = permissiondesc;
   findPermissionDescription(st, &ptr);
-  // step 3
+  // step 3, find out user id, user name, group id, group name
   uid_t uid = st.st_uid;
   gid_t gid = st.st_gid;
   struct passwd * pwd = getpwuid(uid);
@@ -167,8 +184,7 @@ void printStatInfo(struct stat st) {
          pwd->pw_name,
          gid,
          grp->gr_name);
-  // step 4
-  // extract access time, print and free
+  // step 4, extract access time, print and free
   char * timestr = time2str(&st.st_atime, st.st_atim.tv_nsec);
   printf("Access: %s\n", timestr);
   free(timestr);
@@ -184,6 +200,9 @@ void printStatInfo(struct stat st) {
   printf(" Birth: -\n");
 }
 
+/*********
+imitate what stat does
+ */
 int main(int argc, char * argv[]) {
   // check if have correct args number
   if (argc < 2) {
@@ -198,11 +217,8 @@ int main(int argc, char * argv[]) {
       perror("lstat");
       exit(EXIT_FAILURE);
     }
-    // step 1
-    // print line 1
-    printf("  File: %s\n", argv[1]);
-    // print the rest of lines
-    printStatInfo(st);
+    // print the stat info
+    printStatInfo(st, argv[i]);
   }
 
   return EXIT_SUCCESS;
