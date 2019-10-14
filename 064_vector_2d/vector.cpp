@@ -5,13 +5,15 @@
 
 /* write your class implementation in this file
  */
+Vector2D::Vector2D(double a, double b) : x(a), y(b) {
+}
+
 double Vector2D::getMagnitude() const {
   return std::sqrt(x * x + y * y);
 }
 
 Vector2D Vector2D::operator+(const Vector2D & rhs) const {
-  Vector2D myVector;
-  myVector.initVector(rhs.x + x, rhs.y + y);
+  Vector2D myVector(rhs.x + x, rhs.y + y);
   return myVector;
 }
 

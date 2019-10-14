@@ -7,10 +7,8 @@ class Vector2D {
   double x, y;
 
  public:
-  void initVector(double init_x, double init_y) {
-    x = init_x;
-    y = init_y;
-  }
+  Vector2D() : x(0), y(0) {}
+  Vector2D(double a, double b);
   double getMagnitude() const;
   Vector2D operator+(const Vector2D & rhs) const;
   Vector2D & operator+=(const Vector2D & rhs);
