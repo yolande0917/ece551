@@ -1,0 +1,4 @@
+#include "circle.h"
+
+Circle::Circle(Point p, double r) : center(p), radius(r) {
+}
