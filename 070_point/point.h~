@@ -1,0 +1,10 @@
+
+class point {
+ private:
+  double x, y;
+
+ public:
+  point(){};
+  void move(double dx, double dy);
+  double distanceFrom(const Point & p);
+};
