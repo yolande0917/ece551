@@ -33,7 +33,7 @@ int main(int argc, char ** argv) {
 
     for (int i = 1; i < argc; i++) {
       std::ifstream file(argv[i]);
-      if (!file) {
+      if (file.fail()) {
         std::cout << "Invalid file name!" << std::endl;
         exit(EXIT_FAILURE);
       }
