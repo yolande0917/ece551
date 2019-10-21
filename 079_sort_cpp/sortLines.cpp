@@ -32,17 +32,25 @@ int main(int argc, char ** argv) {
     // read from files std::ifstreams
 
     for (int i = 1; i < argc; i++) {
-      std::ifstream file(argv[i]);
-      if (file.fail()) {
+      std::ifstream file;
+      file.open(argv[i]);
+      if (!file.good()) {
         std::cout << "Invalid file name!" << std::endl;
         exit(EXIT_FAILURE);
       }
+      // while (file.good()){
+      //file.getline(s);
+      // }
       while (std::getline(file, s)) {
         // file >> s;
         v.push_back(s);
         s.clear();
       }
       file.close();
+      //      if (file.failbit != 0) {
+      //std::cout << "Invalid file name!" << std::endl;
+      // exit(EXIT_FAILURE);
+      //}
       // sort and print vector
       sortAndPrint(v);
       v.clear();
