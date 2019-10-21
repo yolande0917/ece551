@@ -1,0 +1,35 @@
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <vector>
+
+int main(int argc, char ** argv) {
+  std::vector<std::string> v;
+  std::string s;
+  if (argc == 1) {
+    // read from std::cin
+    while (std::getline(std::cin, s)) {
+      std::cin >> s;
+      v.push_back(s);
+      s.clear();
+    }
+    // sort and print vector
+  }
+  else {
+    // read from files std::ifstreams
+
+    for (int i = 1; i < argc; i++) {
+      std::ifstream file(argv[i]);
+      if (!file.is_open()) {
+        std::cout << "Invalid file name!" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+      while (std::getline(file, s)) {
+        file >> s;
+        s
+      }
+    }
+  }
+
+  return EXIT_SUCCESS;
+}
