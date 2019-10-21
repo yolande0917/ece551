@@ -35,7 +35,7 @@ int main(int argc, char ** argv) {
       std::ifstream file;
       file.open(argv[i]);
       if (!file.good()) {
-        std::cout << "Invalid file name!" << std::endl;
+        std::cerr << "Invalid file name!" << std::endl;
         exit(EXIT_FAILURE);
       }
       // while (file.good()){
