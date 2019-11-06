@@ -46,7 +46,7 @@ void check(Function<int, int> * f,
            const char * mesg) {
   unsigned n;
   if (high > low) {
-    n = std::log2(high - low);
+    n = std::log(high - low) / std::log(2);
   }
   else {
     n = 1;
