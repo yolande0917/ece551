@@ -1,0 +1,62 @@
+#include <stdio.h>
+
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
+
+#include "function.h"
+
+int binarySearchForZero(Function<int, int> * f, int low, int high);
+
+class CountedIntFn : public Function<int, int> {
+ protected:
+  unsigned remaining;
+  Function<int, int> * f;
+  const char * mesg;
+
+ public:
+  CountedIntFn(unsigned n, Function<int, int> * fn, const char * m) :
+      remaining(n),
+      f(fn),
+      mesg(m) {}
+  virtual int invoke(int arg) {
+    if (remaining == 0) {
+      fprintf(stderr, "Too many function invocations in %s\n", mesg);
+      exit(EXIT_FAILURE);
+    }
+    remaining--;
+    return f->invoke(arg);
+  }
+};
+
+class SimpleFunction : public Function<int, int> {
+ public:
+  virtual int invoke(int arg) { return arg; }
+};
+
+void check(Function<int, int> * f,
+           int low,
+           int high,
+           int expected_ans,
+           const char * mesg) {
+  unsigned n;
+  if (high > low) {
+    n = std::log2(high - low);
+  }
+  else {
+    n = 1;
+  }
+
+  CountedIntFn c = CountedIntFn(n, f, mesg);
+  int ans = binarySearchForZero(&c, low, high);
+  assert(ans == expected_ans);
+
+  //  c.invoke(int arg)
+}
+
+int main(void) {
+  SimpleFunction f;
+  check(&f, -1, 1, 0, "SimpleFunction");
+
+  return EXIT_SUCCESS;
+}
