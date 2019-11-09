@@ -1,0 +1,15 @@
+#include <cstdlib>
+
+#include "bstmap.h"
+#include "map.h"
+
+int main(void) {
+  BstMap<int, int> tree;
+  tree.add(10, 110);
+  tree.add(2, 12);
+  tree.add(6, 16);
+  //tree.add(18, 118);
+
+  tree.printTree();
+  return EXIT_SUCCESS;
+}
