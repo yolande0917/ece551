@@ -5,7 +5,7 @@
 void buildMapHelper(Node * node, BitString b, std::map<unsigned, BitString> & theMap) {
   if (node->sym != NO_SYM) {
     assert(node->left == NULL && node->right == NULL);
-    theMap.insert(std::pair<int, BitString>(node->sym, b));
+    theMap.insert(std::pair<unsigned, BitString>(node->sym, b));
   }
   else {
     BitString bl = b.plusZero();
