@@ -4,11 +4,88 @@
 #include <unistd.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
 
-// TODO
+// TODO: comments
+void splitPath(std::vector<char *> & vect, char * pPath) {
+  char * startptr = pPath;
+  char * endptr;
+  size_t len;
+  //size_t len;
+  while ((endptr = strchr(startptr, ':')) != NULL) {
+    len = endptr - startptr;
+    char * dest = new char[len + 1];  // plus 1 for null terminator
+    strncpy(dest, startptr, len);
+    dest[len] = '\0';
+    vect.push_back(dest);
+    // debug
+    // std::cout << dest << std::endl;
+    // update startptr
+    startptr = endptr + 1;
+  }
+}
+
+// TODO: comments
+bool containPath(const char * str) {
+  while (*str != '\0') {
+    if (*str == '/') {
+      return true;
+    }
+    str++;
+  }
+  return false;
+}
+
+// TODO: comments
+void executeProgram(char ** childargv, char ** childenviron, char * pPath) {
+  if (containPath(childargv[0])) {
+    // execute when the first argument contains path
+    // if command not found, print message and exit progress
+    if (execve(childargv[0], childargv, childenviron) == -1) {
+      std::cout << childargv[0] << ": command not found" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+  else {
+    // if argument doesn't contain path, check through ECE551PATH
+    std::vector<char *> paths;
+    splitPath(paths, pPath);
+    std::vector<char *>::iterator it = paths.begin();
+    while (it != paths.end()) {
+      // concatenate path and program
+      size_t pathlen = strlen(*it);
+      size_t comlen = strlen(childargv[0]);
+      char * dest = new char[pathlen + comlen + 4];
+      strcpy(dest, *it);
+      strcat(dest, "/");
+      strcat(dest, childargv[0]);
+      childargv[0] = dest;
+      // debug
+      // std::cout << childargv[0] << std::endl;
+      // execute
+      if (execve(childargv[0], childargv, childenviron) == -1) {
+        // if command not found
+        // if still has other path, check the next one
+        if (it != (paths.end() - 1)) {
+          ++it;
+        }
+        // if is the last path, print message and exit
+        else {
+          std::cout << childargv[0] << ": command not found" << std::endl;
+          exit(EXIT_FAILURE);
+        }
+      }
+      else {
+        return;
+      }
+    }
+  }
+}
+
+// TODO: use reference
 std::vector<std::string> * splitArguments(std::string str) {
   return new std::vector<std::string>;
 }
@@ -33,6 +110,11 @@ void handleStatus(int status) {
 }
 
 int main(int argc, char * argv[]) {
+  char * pPath;
+  pPath = getenv("PATH");
+  if (pPath != NULL) {
+    std::cout << "ECE551PATH is: " << pPath << std::endl;
+  }
   while (1) {
     // repeat displaying the prompt and reading user input
     std::string prompt = "ffosh$ ";
@@ -41,7 +123,7 @@ int main(int argc, char * argv[]) {
     std::getline(std::cin, userinput);
     // exit program if user enter exit or EOF
     if (std::cin.eof() || userinput.compare("exit") == 0) {
-      break;
+      exit(EXIT_SUCCESS);
     }
 
     // TODO split the input string
@@ -64,7 +146,7 @@ int main(int argc, char * argv[]) {
     }
     else if (childpid == 0) {
       // child: execute the specified program
-      execve(childargv[0], childargv, childenviron);
+      executeProgram(childargv, childenviron, pPath);
     }
     else {
       // parent: wait for the child

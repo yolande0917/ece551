@@ -37,4 +37,8 @@ Test Step 1:
     Terminated by signal 15
     which is correct because testsig1 prints the first line of text and then it raises a signal SIGTERM, which is 15.
 
-    
+(8) Run ./myprogram < ./test
+    You will see that it prints
+    ./test: command not found
+    Program failed with code 1
+    which is correct because there is no such thing to execute, so the child process exits with failure.
