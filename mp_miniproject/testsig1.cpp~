@@ -1,0 +1,9 @@
+#include <signal.h>
+
+#include <cstdlib>
+
+int main(void) {
+  signal(5, SIG_IGN);
+  raise(5);
+  return EXIT_SUCCESS;
+}

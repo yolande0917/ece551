@@ -1,0 +1,16 @@
+Option: Command Shell
+
+Test Step 1:
+(1) Run ./myprogram < ./testhw
+    You will see that it prints
+    Hello World!
+    Program was successful
+    which is correct because testhw prints the first line of text and then it exits with 0.
+
+(2) Run ./myprogram < ./testfailhw
+    You will see that it prints
+    Hello World! (but somehow failed)
+    Program failed with code 1
+    which is correct because testfailhw prints the first line of text and then it exit with EXIT_FAILURE which is code 1.
+
+(3)

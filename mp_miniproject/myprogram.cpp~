@@ -1,0 +1,25 @@
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include <cstdlib>
+#include <iostream>
+#include <string>
+
+int main(int argc, char ** argv) {
+  // repeat displaying the prompt and reading user input
+  while (1) {
+    std::string prompt = "ffosh$";
+    std::string userinput;
+    std::cout << prompt;
+    std::getline(std::cin, userinput);
+    // exit program if user enter exit or EOF
+    if (std::cin.eof() || userinput.compare("exit") == 0) {
+      break;
+    }
+    // degug for input extraction
+    std::cout << "Userinput: ";
+    std::cout << userinput << std::endl;
+  }
+
+  return EXIT_SUCCESS;
+}
