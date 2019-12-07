@@ -6,11 +6,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <vector>
 
-/*****
 class CharPtr {
  public:
   char * ptr;
@@ -28,7 +26,7 @@ class CharPtr {
 
   ~CharPtr() { delete[] ptr; }
 };
-*****/
+
 /***
 class StringVec : public std::vector<char *> {
  public:
@@ -45,33 +43,32 @@ class StringVec : public std::vector<char *> {
 ***/
 
 // TODO: comments
-void splitPath(std::vector<std::unique_ptr<char[]> > & vect, char * pPath) {
+void splitPath(std::vector<CharPtr> & vect, char * pPath) {
   char * startptr = pPath;
   char * endptr;
   size_t len;
   while ((endptr = strchr(startptr, ':')) != NULL) {
     len = endptr - startptr;
     // char * dest = new char[len + 1];  // plus 1 for null terminator
-    // CharPtr dest(new char[len + 1]);
-    std::unique_ptr<char[]> dest(new char[len + 1]);
-    strncpy(dest.get(), startptr, len);
-    (dest.get())[len] = '\0';
+    CharPtr dest(new char[len + 1]);
+    strncpy(dest.ptr, startptr, len);
+    (dest.ptr)[len] = '\0';
     vect.push_back(dest);
     // debug
-    std::cout << dest.get() << std::endl;
+    std::cout << dest.ptr << std::endl;
     // delete[] dest;
     // update startptr
     startptr = endptr + 1;
   }
   len = strlen(startptr);
   //char * dest = new char[len + 1];
-  std::unique_ptr<char[]> dest(new char[len + 1]);
+  CharPtr dest(new char[len + 1]);
 
-  strcpy(dest.get(), startptr);
-  (dest.get())[len] = '\0';
+  strcpy(dest.ptr, startptr);
+  (dest.ptr)[len] = '\0';
   vect.push_back(dest);
   // debug
-  std::cout << dest.get() << std::endl;
+  std::cout << dest.ptr << std::endl;
 }
 
 // TODO: comments
@@ -97,26 +94,26 @@ void executeProgram(char ** childargv, char ** childenviron, char * pPath) {
   }
   else {
     // if argument doesn't contain path, check through ECE551PATH
-    std::vector<std::unique_ptr<char[]> > paths;
+    std::vector<CharPtr> paths;
     splitPath(paths, pPath);
-    std::vector<std::unique_ptr<char[]> >::iterator it = paths.begin();
+    std::vector<CharPtr>::iterator it = paths.begin();
     while (it != paths.end()) {
       // concatenate path and program
-      size_t pathlen = strlen((*it).get());
+      size_t pathlen = strlen((*it).ptr);
       // debug
       std::cout << pathlen << std::endl;
       size_t comlen = strlen(childargv[0]);
       // keep a copy of old childargv[0]
       //  char * oldargv = new char[comlen + 1];
-      std::unique_ptr<char[]> oldargv(new char[comlen + 1]);
-      strcpy(oldargv.get(), childargv[0]);
+      CharPtr oldargv(new char[comlen + 1]);
+      strcpy(oldargv.ptr, childargv[0]);
       // char * dest = new char[pathlen + comlen + 2];
-      std::unique_ptr<char[]> dest(new char[pathlen + comlen + 2]);
+      CharPtr dest(new char[pathlen + comlen + 2]);
 
-      strcpy(dest.get(), (*it).get());
-      strcat(dest.get(), "/");
-      strcat(dest.get(), childargv[0]);
-      strcpy(childargv[0], dest.get());
+      strcpy(dest.ptr, (*it).ptr);
+      strcat(dest.ptr, "/");
+      strcat(dest.ptr, childargv[0]);
+      strcpy(childargv[0], dest.ptr);
       // debug
       std::cout << childargv[0] << std::endl;
       // delete[] dest.ptr;
@@ -128,7 +125,7 @@ void executeProgram(char ** childargv, char ** childenviron, char * pPath) {
           std::cout << childargv[0] << ": command not found" << std::endl;
           // delete[] * it;
           ++it;
-          strcpy(childargv[0], oldargv.get());
+          strcpy(childargv[0], oldargv.ptr);
           // delete[] oldargv;
         }
         // if is the last path, print message and exit
