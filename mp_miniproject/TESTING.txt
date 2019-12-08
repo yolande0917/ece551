@@ -107,7 +107,27 @@ Test Step 2:
     ECE551PATH, then find the program /usr/bin/test exists. It then executes the program
     but it failed. 
 
+Test step 3:
+
+(1) Run ./myprogram < cd aaaa  ddd
+    You will see that it prints:
+    cd: Invalid argument
+    Command failed
+    , and the prompt is still shown as default (ffosh:/home/jx94/ece551/mp_miniproject $).
+    This output is correct because cd command is supposed to take 1 argument. If the argument
+    number is not right, then it shows the error and continues to next prompt.
+
+(2) Run ./myprogram < cd   aaaaa
+    You will see that it prints:
+    cd: aaaaa: No such file or directory
+    Command failed
+    , which is correct because the directory aaaaa doesn't exists.
+
+(3) Run ./myprogram < cd /home/jx94/ece551
+    You will see that it prints nothing, but the next prompt showing "ffosh:/home/jx94/ece551 $", which is correct because the input is a valid cd command, and the program changed directory
+    to /home/jx94/ece551 as requested.
     
+   
     
 
     

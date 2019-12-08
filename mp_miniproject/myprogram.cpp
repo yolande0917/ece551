@@ -384,15 +384,141 @@ void moveArguments(ArgvContainer & container, StringVec & vec) {
   container.attach(data, n + 1);
 }
 
-// TODO: check: set export rev env
-bool isBuildInCommand(std::string inputStr) {
+// TODO: check: cd set export rev env
+bool isBuildInCommand(std::string command) {
+  std::string str(command);
+  if (str.compare("cd") == 0 || str.compare("set") == 0 || str.compare("export") == 0 ||
+      str.compare("rev") == 0 || str.compare("env") == 0) {
+    return true;
+  }
   return false;
+}
+
+/*********
+// TODO
+int runcd(StringVec vec) {
+  std::string inputcopy(inputStr);
+  char * input = &inputcopy[0];
+  //debug
+  std::cout << input << "\n";
+  char * start = strchr(input, ' ');
+  if (start == NULL) {
+    std::cout << "Error: doesn't find space\n";
+    return -1;
+  }
+  while (*start == ' ') {
+    start++;
+  }
+  char * end = strchr(start, ' ');
+  size_t len = strlen(start);
+  if (end != NULL) {
+    len = end - start;
+  }
+  else {
+    // check if have more argument
+    while (*end == ' ') {
+      end++;
+    }
+    if (*end != '\0') {
+      std::cout << "cd: Invalid argument\n";
+      return -1;
+    }
+  }
+  char * dir = new char[len + 1];
+  strncpy(dir, start, len);
+  dir[len] = '\0';
+  // debug
+  std::cout << dir << "\n";
+  int r = chdir(dir);
+
+  if (r == -1) {
+    std::cout << "cd: " << dir << ": No such file or directory\n";
+    delete[] dir;
+    return -1;
+  }
+  delete[] dir;
+  return 0;
+}
+
+*********/
+
+// TODO
+void splitCommandArg(StringVec & vec, std::string inputStr) {
+  std::string inputcopy(inputStr);
+  char * input = &inputcopy[0];
+  char * start = input;
+  char * firstspace = strchr(start, ' ');
+  while ((firstspace = strchr(start, ' ')) != NULL) {
+    size_t len = firstspace - start;
+    char * dest = new char[len + 1];
+    strncpy(dest, start, len);
+    dest[len] = '\0';
+    vec.push_back(dest);
+    delete[] dest;
+    while (*firstspace == ' ') {
+      firstspace++;
+    }
+    if (*firstspace == '\0') {
+      return;
+    }
+    start = firstspace;
+  }
+  size_t len = strlen(start);
+  char * dest = new char[len + 1];
+  strcpy(dest, start);
+  vec.push_back(dest);
+  delete[] dest;
+}
+
+// TODO
+int runcd(StringVec & vec) {
+  std::string str(vec[1]);
+  char * dir = &str[0];
+  int result = chdir(dir);
+  if (result == -1) {
+    std::cout << "cd: " << dir << ": No such file or directory\n";
+    return -1;
+  }
+  return 0;
+}
+
+// TODO
+int commandHandler(StringVec & vec, std::string inputStr) {
+  /*****
+  std::string inputcopy(inputStr);
+  char * com = &inputcopy[0];
+  char * ptr = strchr(com, ' ');
+  if (ptr != NULL) {
+    *ptr = '\0';
+  }
+  *****/
+  std::string str(vec[0]);
+  // cd
+  if (str.compare("cd") == 0) {
+    if (vec.size() != 2) {
+      std::cout << "cd: Invalid argument\n";
+      return -1;
+    }
+    // debug
+    std::cout << "Run cd.\n";
+    //  return -1;
+    return (runcd(vec));
+  }
+  else if (str.compare("set") == 0) {
+  }
+  else if (str.compare("export") == 0) {
+  }
+  else if (str.compare("rev") == 0) {
+  }
+  else if (str.compare("env") == 0) {
+  }
+  return -1;
 }
 
 /******
 The program starts a simple command shell
  ******/
-int main(int argc, char * argv[]) {
+int main(void) {
   char * pPath;
   pPath = getenv("PATH");
   if (pPath != NULL) {
@@ -400,11 +526,16 @@ int main(int argc, char * argv[]) {
   }
   while (1) {
     // repeat displaying the prompt and reading user input
-
-    // TODO: show current directory
-    std::string prompt = "ffosh$ ";
+    // show current directory and prompt
+    char * currentdir = get_current_dir_name();
+    if (currentdir == NULL) {
+      perror("get_current_dir_name");
+      break;
+    }
+    std::string prompt = "ffosh:";
     std::string userinput;
-    std::cout << prompt;
+    std::cout << prompt << currentdir << " $";
+    free(currentdir);
     std::getline(std::cin, userinput);
     // exit program if user enter exit or EOF
     if (std::cin.eof() || userinput.compare("exit") == 0) {
@@ -412,8 +543,17 @@ int main(int argc, char * argv[]) {
     }
 
     // TODO: build in commands: cd set export rev env
-    if (isBuildInCommand(userinput)) {
+    StringVec commandargs;
+    splitCommandArg(commandargs, userinput);
+    // debug
+    for (size_t i = 0; i < commandargs.size(); i++) {
+      std::cout << commandargs[i] << "\n";
+    }
+    if (isBuildInCommand(commandargs[0])) {
       // TODO: handle build in commands
+      if (commandHandler(commandargs, userinput) == -1) {
+        std::cout << "Command failed\n";
+      }
       continue;
     }
     // for external programs, check unclosed quotation mark
