@@ -1,4 +1,4 @@
-Option: Command Shell
+Command Shell
 
 Test Step 1:
 (1) Run ./myprogram < ./testhw
@@ -8,16 +8,16 @@ Test Step 1:
     which is correct because testhw prints the first line of text and then main returns EXIT_SUCCESS, which is code 0.
 
 (2) Run ./myprogram < ./testfailhw
-    You will see that it prints
+    You will see that it prints:
     Hello World! (but somehow failed)
     Program failed with code 1
-    which is correct because testfailhw prints the first line of text and then main returns EXIT_FAILURE, which is code 1.
+    , which is correct because testfailhw prints the first line of text and then main returns EXIT_FAILURE, which is code 1.
 
 (3) Run ./myprogram < ./testfail
-    You will see that it prints
+    You will see that it prints:
     A failure.
     Program failed with code 2
-    which is correct because testfail prints the first line of text and then it exits with code 2.
+    , which is correct because testfail prints the first line of text and then it exits with code 2.
 
 (4) Run ./myprogram < exit
     You will see that the shell exits, which is correct because the shell should exit if user types that command.
@@ -32,13 +32,82 @@ Test Step 1:
     which is correct because testsig1 prints the first line of text and then it raises a signal 5.
     
 (7) Run ./myprogram < ./testsig2
-    You will see that it prints
+    You will see that it prints:
     Sending signal 15.
     Terminated by signal 15
-    which is correct because testsig1 prints the first line of text and then it raises a signal SIGTERM, which is 15.
+    , which is correct because testsig1 prints the first line of text and then it raises a signal SIGTERM, which is 15.
 
 (8) Run ./myprogram < ./test
-    You will see that it prints
+    You will see that it prints:
     ./test: command not found
     Program failed with code 1
-    which is correct because there is no such thing to execute, so the child process exits with failure.
+    , which is correct because there is no such thing to execute, so the child process exits with failure.
+
+
+Test Step 2:
+
+(1) Run ./myprogram < ./testprintargs   aaa     bbb  ccc   dd  \  "ee  ff" \\ ggg  \\\ \"
+    You will see that it prints:
+    Print out arguments:
+    Argument 1: ./testprintargs
+    Argument 2: aaa
+    Argument 3: bbb
+    Argument 4: ccc
+    Argument 5: dd
+    Argument 6: ee  ff
+    Argument 7: \
+    Argument 8: ggg
+    Argument 9: \
+    Argument 10: "
+    Program was successful
+    , which is correct because testprintargs prints out all arguments passed to its main.
+    The single \ is ignored in this shell. Therefore, \\\ will also be evaluated to \.
+    \\ is evaluated to be \, and \" is evaluated to be " as escaped quotation marks.
+
+(2) Run ./myprogram < ./testprintargs   abc  "defg iii"  \\  "yyy\\\"
+    You will see that it prints:
+    Invalid command: contains unclosed quotation mark
+    , which is correct because unclosed quotation mark is an error. The last quote is evalated
+    to a literal quotation mark, so there is no matching quotation mark of the " before yyy.
+
+(3) Run ./myprogram < ./testprintargs   "\"hello world\""   "a\\b\\c d\\"
+    You will see that it prints:
+    Print out arguments:
+    Argument 1: ./testprintargs
+    Argument 2: "hello world"
+    Argument 3: a\b\c d\
+    Program was successful
+    , which is correct because \" is evaluated to literal quotation mark, and \\ is evaluated
+    to \.
+
+(4) Run ./myprogram < aaa
+    You will see that it prints:
+    /usr/local/sbin/aaa: command not found
+    /usr/local/bin/aaa: command not found
+    /usr/sbin/aaa: command not found
+    /usr/bin/aaa: command not found
+    /sbin/aaa: command not found
+    /bin/aaa: command not found
+    /usr/games/aaa: command not found
+    /usr/local/games/aaa: command not found
+    Program failed with code 1
+    , which is correct because the child progress searched through each directory in default
+    ECE551PATH, which is the same as PATH, but doesn't find the command. Then the child
+    progress exits with failure.
+
+(5) Run ./myprogram < test
+    You will see that it prints:
+    /usr/local/sbin/test: command not found
+    /usr/local/bin/test: command not found
+    /usr/sbin/test: command not found
+    /usr/bin/test: 
+    Program failed with code 1
+    , which is correct because the child progress searched through each directory in default
+    ECE551PATH, then find the program /usr/bin/test exists. It then executes the program
+    but it failed. 
+
+    
+    
+
+    
+    

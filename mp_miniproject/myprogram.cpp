@@ -371,6 +371,11 @@ void moveArguments(ArgvContainer & container, StringVec & vec) {
   container.attach(data, n + 1);
 }
 
+// TODO: check: set export rev env
+bool isBuildInCommand(std::string inputStr) {
+  return false;
+}
+
 int main(int argc, char * argv[]) {
   char * pPath;
   pPath = getenv("PATH");
@@ -379,6 +384,8 @@ int main(int argc, char * argv[]) {
   }
   while (1) {
     // repeat displaying the prompt and reading user input
+
+    // TODO: show current directory
     std::string prompt = "ffosh$ ";
     std::string userinput;
     std::cout << prompt;
@@ -388,18 +395,14 @@ int main(int argc, char * argv[]) {
       break;
     }
 
-    // TODO split the input string
-    // std::vector<std::string> progargv;
-    // progargv = splitArguments(userinput);
-    char * childenviron[] = {NULL};
-    // for part 1, replace later
-    char * childargv[2];
-    childargv[0] = &userinput[0];
-    childargv[1] = NULL;
-
-    // check unclosed quotation mark
-    if (hasUnclosedQuote(userinput)) {
-      std::cout << "Invalid command: contains unclosed quotation marks.\n";
+    // TODO: build in commands: cd set export rev env
+    if (isBuildInCommand(userinput)) {
+      // TODO: handle build in commands
+      continue;
+    }
+    // for external programs, check unclosed quotation mark
+    else if (hasUnclosedQuote(userinput)) {
+      std::cout << "Invalid command: contains unclosed quotation mark\n";
       continue;
     }
     std::cout << "Start split arguments.\n";
@@ -412,9 +415,12 @@ int main(int argc, char * argv[]) {
       std::cout << arguments[i] << std::endl;
     }
 
-    // TODO: create a class to contain arguments
+    // create a class to contain arguments
     ArgvContainer container;
     moveArguments(container, arguments);
+
+    char * childenviron[] = {NULL};
+
     // fork a child process
     pid_t childpid, waitpid;
     int childstatus;
@@ -425,7 +431,7 @@ int main(int argc, char * argv[]) {
       exit(EXIT_FAILURE);
     }
     else if (childpid == 0) {
-      // TODO: modify the function. child: execute the specified program
+      // child: execute the specified program
       executeProgram(container.get(), childenviron, pPath);
     }
     else {
