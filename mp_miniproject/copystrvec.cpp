@@ -6,72 +6,47 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <vector>
 
-/*****
-class CharPtr {
+class StringVec : public std::vector<std::string> {
  public:
-  char * ptr;
-
-  explicit CharPtr(char * ptr_) : ptr(ptr_) {}
-
-  CharPtr(const CharPtr & rhs) : ptr(NULL) {
-    size_t len = strlen(rhs.ptr);
-    char * temp = new char[len + 1];
-    strcpy(temp, rhs.ptr);
-    ptr = temp;
-    //  std::swap(ptr, temp);
-    delete[] temp;
-  }
-
-  ~CharPtr() { delete[] ptr; }
-};
-*****/
-/***
-class StringVec : public std::vector<char *> {
- public:
-  StringVec() { std::cout << "Call constructor.\n"; }
   virtual ~StringVec() {
-    std::cout << "Call destructor.\n";
     StringVec::iterator it = begin();
     while (it != end()) {
-      delete[] * it;
-      ++it;
+      (*it).clear();
     }
   }
 };
-***/
 
 // TODO: comments
-void splitPath(std::vector<std::unique_ptr<char[]> > & vect, char * pPath) {
+void splitPath(StringVec & vect, char * pPath) {
   char * startptr = pPath;
   char * endptr;
   size_t len;
   while ((endptr = strchr(startptr, ':')) != NULL) {
     len = endptr - startptr;
-    // char * dest = new char[len + 1];  // plus 1 for null terminator
-    // CharPtr dest(new char[len + 1]);
-    std::unique_ptr<char[]> dest(new char[len + 1]);
-    strncpy(dest.get(), startptr, len);
-    (dest.get())[len] = '\0';
-    vect.push_back(dest);
+    char * dest = new char[len + 1];  // plus 1 for null terminator
+    strncpy(dest, startptr, len);
+    dest[len] = '\0';
+    std::string str(dest);
+    vect.push_back(str);
+    delete[] dest;
     // debug
-    std::cout << dest.get() << std::endl;
+    std::cout << str << std::endl;
     // delete[] dest;
     // update startptr
     startptr = endptr + 1;
   }
   len = strlen(startptr);
-  //char * dest = new char[len + 1];
-  std::unique_ptr<char[]> dest(new char[len + 1]);
-
-  strcpy(dest.get(), startptr);
-  (dest.get())[len] = '\0';
-  vect.push_back(dest);
+  char * dest = new char[len + 1];
+  strcpy(dest, startptr);
+  dest[len] = '\0';
+  std::string str(dest);
+  vect.push_back(str);
+  delete[] dest;
   // debug
-  std::cout << dest.get() << std::endl;
+  std::cout << str << std::endl;
 }
 
 // TODO: comments
@@ -97,29 +72,27 @@ void executeProgram(char ** childargv, char ** childenviron, char * pPath) {
   }
   else {
     // if argument doesn't contain path, check through ECE551PATH
-    std::vector<std::unique_ptr<char[]> > paths;
+    StringVec paths;
     splitPath(paths, pPath);
-    std::vector<std::unique_ptr<char[]> >::iterator it = paths.begin();
+    std::vector<std::string>::iterator it = paths.begin();
     while (it != paths.end()) {
       // concatenate path and program
-      size_t pathlen = strlen((*it).get());
+      char * path = &(*it)[0];
+      size_t pathlen = strlen(path);
       // debug
       std::cout << pathlen << std::endl;
       size_t comlen = strlen(childargv[0]);
       // keep a copy of old childargv[0]
-      //  char * oldargv = new char[comlen + 1];
-      std::unique_ptr<char[]> oldargv(new char[comlen + 1]);
-      strcpy(oldargv.get(), childargv[0]);
-      // char * dest = new char[pathlen + comlen + 2];
-      std::unique_ptr<char[]> dest(new char[pathlen + comlen + 2]);
-
-      strcpy(dest.get(), (*it).get());
-      strcat(dest.get(), "/");
-      strcat(dest.get(), childargv[0]);
-      strcpy(childargv[0], dest.get());
+      char * oldargv = new char[comlen + 1];
+      strcpy(oldargv, childargv[0]);
+      char * dest = new char[pathlen + comlen + 2];
+      strcpy(dest, path);
+      strcat(dest, "/");
+      strcat(dest, childargv[0]);
+      strcpy(childargv[0], dest);
       // debug
       std::cout << childargv[0] << std::endl;
-      // delete[] dest.ptr;
+      delete[] dest;
       // execute
       if (execve(childargv[0], childargv, childenviron) == -1) {
         // if command not found
@@ -128,13 +101,13 @@ void executeProgram(char ** childargv, char ** childenviron, char * pPath) {
           std::cout << childargv[0] << ": command not found" << std::endl;
           // delete[] * it;
           ++it;
-          strcpy(childargv[0], oldargv.get());
-          // delete[] oldargv;
+          strcpy(childargv[0], oldargv);
+          delete[] oldargv;
         }
         // if is the last path, print message and exit
         else {
-          // delete[] oldargv;
-          // delete[] * it;
+          delete[] oldargv;
+          //delete[] * it;
           // ++it;
           // delete[] * it;
           std::cout << childargv[0] << ": command not found" << std::endl;
