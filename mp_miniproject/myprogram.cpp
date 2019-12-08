@@ -3,12 +3,15 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
+class VarMap : public std::map<std::string, std::string> {};
 /*****
 A class that has a field of char ** to store arguments.
 Another size_t field stores the number of char * 
@@ -252,11 +255,86 @@ void backSlashHandler(char *& str) {
   }
 }
 
+// TODO
+std::string searchVar(std::string source, VarMap & map) {
+  size_t len = source.length();  // first char in source is $
+  size_t trim = 0;
+  while (len - trim > 1) {
+    std::string name = source.substr(1, len - trim - 1);
+    VarMap::iterator it;
+    it = map.find(name);
+    if (it != map.end()) {
+      // found the key
+      std::string value = it->second;
+      // debug
+      std::cout << "trim = " << trim << "\n";
+      std::cout << "Found value in map: " << value << "\n";
+      if (trim > 0) {
+        return (value + source.substr(len - trim, trim));
+      }
+      else {
+        return value;
+      }
+    }
+    trim++;
+  }
+  // var not found
+  return source;
+}
+
+// TODO
+std::string replaceVar(std::string str, VarMap & map) {
+  std::string copy(str);
+  char * input = &copy[0];
+  char * start = input;
+  char * dollar;
+
+  while ((dollar = strchr(start, '$')) != NULL) {
+    // find ending
+    char * end = dollar + 1;
+    while (isalpha(*end) || isdigit(*end) || *end == '_') {
+      end++;
+    }
+    // no valid var name after $
+    if (end - dollar == 1) {
+      return copy;
+    }
+    // search variable
+    size_t len = end - dollar;
+    std::string varname = copy.substr(dollar - input, len);
+    //debug
+    std::cout << "search from: " << varname << "\n";
+    std::string aftervar = copy.substr(end - input);
+    std::string newstr = searchVar(varname, map);
+    // doesn't find var in the search string
+    if (newstr.compare(varname) == 0) {
+      start = end;
+      continue;
+    }
+    size_t newlen = newstr.length();
+    size_t beforelen = dollar - input;
+
+    if (beforelen > 0) {
+      std::string beforevar = copy.substr(0, beforelen);
+      copy = beforevar + newstr + aftervar;
+    }
+    else {
+      copy = newstr + aftervar;
+    }
+    // reassign input and start
+    input = &copy[0];
+    start = input + newlen + beforelen;
+  }
+  //debug
+  std::cout << "After var replace: " << copy << "\n";
+  return copy;
+}
+
 /******
 Given the user input string, split the arguments 
 and store into StringVec
  *****/
-void splitArguments(StringVec & vec, std::string inputStr) {
+void splitArguments(StringVec & vec, std::string inputStr, VarMap & map) {
   char * input = &inputStr[0];
   char * start = input;
   char * firstspace = strchr(start, ' ');
@@ -275,9 +353,15 @@ void splitArguments(StringVec & vec, std::string inputStr) {
       //  handle backslashes
       if (len > 1) {
         backSlashHandler(dest);
+        // TODO: replace var
+        std::string newstr = replaceVar(std::string(dest), map);
+        delete[] dest;
+        vec.push_back(newstr);
       }
-      vec.push_back(std::string(dest));
-      delete[] dest;
+      else {
+        vec.push_back(std::string(dest));
+        delete[] dest;
+      }
     }
     start = findNextArg(firstspace);
     // space at the end
@@ -312,9 +396,15 @@ void splitArguments(StringVec & vec, std::string inputStr) {
     // handle backslashes
     if (len > 1) {
       backSlashHandler(dest);
+      // TODO: replace var
+      std::string newstr = replaceVar(std::string(dest), map);
+      delete[] dest;
+      vec.push_back(newstr);
     }
-    vec.push_back(std::string(dest));
-    delete[] dest;
+    else {
+      vec.push_back(std::string(dest));
+      delete[] dest;
+    }
   }
 }
 
@@ -394,54 +484,6 @@ bool isBuildInCommand(std::string command) {
   return false;
 }
 
-/*********
-// TODO
-int runcd(StringVec vec) {
-  std::string inputcopy(inputStr);
-  char * input = &inputcopy[0];
-  //debug
-  std::cout << input << "\n";
-  char * start = strchr(input, ' ');
-  if (start == NULL) {
-    std::cout << "Error: doesn't find space\n";
-    return -1;
-  }
-  while (*start == ' ') {
-    start++;
-  }
-  char * end = strchr(start, ' ');
-  size_t len = strlen(start);
-  if (end != NULL) {
-    len = end - start;
-  }
-  else {
-    // check if have more argument
-    while (*end == ' ') {
-      end++;
-    }
-    if (*end != '\0') {
-      std::cout << "cd: Invalid argument\n";
-      return -1;
-    }
-  }
-  char * dir = new char[len + 1];
-  strncpy(dir, start, len);
-  dir[len] = '\0';
-  // debug
-  std::cout << dir << "\n";
-  int r = chdir(dir);
-
-  if (r == -1) {
-    std::cout << "cd: " << dir << ": No such file or directory\n";
-    delete[] dir;
-    return -1;
-  }
-  delete[] dir;
-  return 0;
-}
-
-*********/
-
 // TODO
 void splitCommandArg(StringVec & vec, std::string inputStr) {
   std::string inputcopy(inputStr);
@@ -483,15 +525,33 @@ int runcd(StringVec & vec) {
 }
 
 // TODO
-int commandHandler(StringVec & vec, std::string inputStr) {
-  /*****
-  std::string inputcopy(inputStr);
-  char * com = &inputcopy[0];
-  char * ptr = strchr(com, ' ');
-  if (ptr != NULL) {
-    *ptr = '\0';
+int runset(VarMap & map, std::string key, std::string value) {
+  // check if key is valid
+  char * c = &key[0];
+  while (*c != '\0') {
+    if (!(isalpha(*c) || isdigit(*c) || *c == '_')) {
+      std::cout << "set: Invalid variable name\n";
+      return -1;
+    }
+    c++;
   }
-  *****/
+  // if already contains the key, erase it
+  VarMap::iterator it;
+  it = map.find(key);
+  if (it != map.end()) {
+    map.erase(it);
+  }
+  // insert the key value pair
+  map.insert(std::pair<std::string, std::string>(key, value));
+  // TODO: set ECE551PATH in env
+  if (key.compare("ECE551PATH") == 0) {
+  }
+
+  return 0;
+}
+
+// TODO
+int commandHandler(StringVec & vec, std::string inputStr, VarMap & map) {
   std::string str(vec[0]);
   // cd
   if (str.compare("cd") == 0) {
@@ -499,12 +559,30 @@ int commandHandler(StringVec & vec, std::string inputStr) {
       std::cout << "cd: Invalid argument\n";
       return -1;
     }
-    // debug
-    std::cout << "Run cd.\n";
-    //  return -1;
-    return (runcd(vec));
+    return runcd(vec);
   }
+  // set
   else if (str.compare("set") == 0) {
+    if (vec.size() < 3) {
+      std::cout << "set: Invalid arguments\n";
+      return -1;
+    }
+    // find the value
+    std::string inputcopy(inputStr);
+    size_t start = 3;  // start with index of first space
+    while (inputcopy[start] == ' ') {
+      start++;
+    }
+    while (inputcopy[start] != ' ') {
+      start++;
+    }
+    while (inputcopy[start] == ' ') {
+      start++;
+    }
+    std::string value = inputcopy.substr(start);
+    // debug
+    std::cout << "Value: " << value << "\n";
+    return runset(map, vec[1], value);
   }
   else if (str.compare("export") == 0) {
   }
@@ -519,12 +597,19 @@ int commandHandler(StringVec & vec, std::string inputStr) {
 The program starts a simple command shell
  ******/
 int main(void) {
+  VarMap map;
   char * pPath;
   pPath = getenv("PATH");
   if (pPath != NULL) {
     std::cout << "ECE551PATH is: " << pPath << std::endl;
   }
+  map.insert(std::pair<std::string, std::string>("ECE551path", pPath));
+  // TODO: put ECE551PATH into env
+
   while (1) {
+    //debug
+    std::cout << "Map size = " << map.size() << "\n";
+
     // repeat displaying the prompt and reading user input
     // show current directory and prompt
     char * currentdir = get_current_dir_name();
@@ -537,7 +622,18 @@ int main(void) {
     std::cout << prompt << currentdir << " $";
     free(currentdir);
     std::getline(std::cin, userinput);
+    // trim spaces at the begining
+    size_t start = 0;
+    while (userinput.at(start) == ' ') {
+      start++;
+    }
+    if (userinput.at(start) == '\0') {
+      std::cout << "Invalid input\n";
+      break;
+    }
+    userinput = userinput.substr(start);
     // exit program if user enter exit or EOF
+    // TODO: spaces after exit
     if (std::cin.eof() || userinput.compare("exit") == 0) {
       break;
     }
@@ -551,7 +647,7 @@ int main(void) {
     }
     if (isBuildInCommand(commandargs[0])) {
       // TODO: handle build in commands
-      if (commandHandler(commandargs, userinput) == -1) {
+      if (commandHandler(commandargs, userinput, map) == -1) {
         std::cout << "Command failed\n";
       }
       continue;
@@ -562,8 +658,10 @@ int main(void) {
       continue;
     }
     // split arguments from user input
+
+    // TODO: replace var
     StringVec arguments;
-    splitArguments(arguments, userinput);
+    splitArguments(arguments, userinput, map);
     // debug
     for (size_t i = 0; i < arguments.size(); i++) {
       std::cout << arguments[i] << std::endl;
