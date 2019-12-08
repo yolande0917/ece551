@@ -9,6 +9,11 @@
 #include <string>
 #include <vector>
 
+/*****
+A class that has a field of char ** to store arguments.
+Another size_t field stores the number of char * 
+Note that when the argv field is not NULL, the last element of it is NULL
+ *****/
 class ArgvContainer {
  public:
   char ** argv;
@@ -39,6 +44,7 @@ class ArgvContainer {
   }
   // get
   char **& get() { return argv; }
+  // size
   size_t size() { return n; }
   // copy constructor
   ArgvContainer(ArgvContainer & rhs) : argv(NULL), n(rhs.size()) {
@@ -88,8 +94,6 @@ void splitPath(StringVec & vect, char * pPath) {
     dest[len] = '\0';
     vect.push_back(std::string(dest));
     delete[] dest;
-    // debug
-    // std::cout << str << std::endl;
     // update startptr
     startptr = endptr + 1;
   }
@@ -98,7 +102,6 @@ void splitPath(StringVec & vect, char * pPath) {
   strcpy(dest, startptr);
   vect.push_back(std::string(dest));
   delete[] dest;
-  // debug
   // std::cout << str << std::endl;
 }
 
@@ -116,7 +119,7 @@ bool containPath(const char * str) {
 }
 
 /*******
-execute the child process with specific program
+Execute the child process with specific path and arguments
  *******/
 void executeProgram(char **& childargv, char ** childenviron, char * pPath) {
   if (containPath(childargv[0])) {
@@ -136,8 +139,6 @@ void executeProgram(char **& childargv, char ** childenviron, char * pPath) {
       // concatenate path and program
       char * path = &(*it)[0];
       size_t pathlen = strlen(path);
-      // debug
-      std::cout << pathlen << std::endl;
       size_t comlen = strlen(childargv[0]);
       // keep a copy of old childargv[0]
       char * oldargv = new char[comlen + 1];
@@ -147,8 +148,6 @@ void executeProgram(char **& childargv, char ** childenviron, char * pPath) {
       strcat(dest, "/");
       strcat(dest, childargv[0]);
       strcpy(childargv[0], dest);
-      // debug
-      std::cout << childargv[0] << std::endl;
       delete[] dest;
       // execute
       if (execve(childargv[0], childargv, childenviron) == -1) {
@@ -174,7 +173,10 @@ void executeProgram(char **& childargv, char ** childenviron, char * pPath) {
   }
 }
 
-// TODO
+/********
+Given a string starts with space, returns a char pointer
+to the first character that is not space.
+ *******/
 char * findNextArg(char * spaceptr) {
   while ((*spaceptr) == ' ') {
     spaceptr++;
@@ -182,7 +184,10 @@ char * findNextArg(char * spaceptr) {
   return spaceptr;
 }
 
-// TODO
+/*****
+Given the char pointer right after a starting quotation mark,
+find the matching close quotation mark.
+******/
 char * findCloseQuote(char * start) {
   char * ptr;
   int count = 0;
@@ -203,7 +208,9 @@ char * findCloseQuote(char * start) {
   return ptr;
 }
 
-// TODO
+/*******
+Delete the backslashes within one argument string
+********/
 void backSlashHandler(char *& str) {
   char * start = str;
   char * slashptr;
@@ -245,7 +252,10 @@ void backSlashHandler(char *& str) {
   }
 }
 
-// TODO
+/******
+Given the user input string, split the arguments 
+and store into StringVec
+ *****/
 void splitArguments(StringVec & vec, std::string inputStr) {
   char * input = &inputStr[0];
   char * start = input;
@@ -266,12 +276,14 @@ void splitArguments(StringVec & vec, std::string inputStr) {
       if (len > 1) {
         backSlashHandler(dest);
       }
-      // debug
-      std::cout << dest << std::endl;
       vec.push_back(std::string(dest));
       delete[] dest;
     }
     start = findNextArg(firstspace);
+    // space at the end
+    if (*start == '\0') {
+      return;
+    }
     // handle quotes
     if (*start == '"') {
       start++;
@@ -301,8 +313,6 @@ void splitArguments(StringVec & vec, std::string inputStr) {
     if (len > 1) {
       backSlashHandler(dest);
     }
-    // debug
-    std::cout << dest << std::endl;
     vec.push_back(std::string(dest));
     delete[] dest;
   }
@@ -327,7 +337,9 @@ void handleStatus(int status) {
   }
 }
 
-// TODO: comments
+/********
+Check if the user input string contains unclosed quotation mark
+ *******/
 bool hasUnclosedQuote(std::string inputStr) {
   char * input = &inputStr[0];
   char * start = input;
@@ -346,12 +358,13 @@ bool hasUnclosedQuote(std::string inputStr) {
     contslash = 0;
     start = ptr + 1;
   }
-  // debug
-  std::cout << count << "\n";
   return (count % 2) != 0;
 }
 
-// TODO
+/*******
+Move the arguments from StringVec to a container that has a field of char **
+Note that the last element of char ** is NULL as requested by execve
+ ******/
 void moveArguments(ArgvContainer & container, StringVec & vec) {
   size_t n = vec.size();
   char ** data = new char *[n + 1];
@@ -376,6 +389,9 @@ bool isBuildInCommand(std::string inputStr) {
   return false;
 }
 
+/******
+The program starts a simple command shell
+ ******/
 int main(int argc, char * argv[]) {
   char * pPath;
   pPath = getenv("PATH");
@@ -405,22 +421,17 @@ int main(int argc, char * argv[]) {
       std::cout << "Invalid command: contains unclosed quotation mark\n";
       continue;
     }
-    std::cout << "Start split arguments.\n";
     // split arguments from user input
     StringVec arguments;
     splitArguments(arguments, userinput);
-    std::cout << "Finish split arguments.\n";
     // debug
     for (size_t i = 0; i < arguments.size(); i++) {
       std::cout << arguments[i] << std::endl;
     }
-
     // create a class to contain arguments
     ArgvContainer container;
     moveArguments(container, arguments);
-
     char * childenviron[] = {NULL};
-
     // fork a child process
     pid_t childpid, waitpid;
     int childstatus;

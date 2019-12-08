@@ -63,6 +63,7 @@ Test Step 2:
     , which is correct because testprintargs prints out all arguments passed to its main.
     The single \ is ignored in this shell. Therefore, \\\ will also be evaluated to \.
     \\ is evaluated to be \, and \" is evaluated to be " as escaped quotation marks.
+    Note that spaces at the end of input will not be counted as argument.
 
 (2) Run ./myprogram < ./testprintargs   abc  "defg iii"  \\  "yyy\\\"
     You will see that it prints:
