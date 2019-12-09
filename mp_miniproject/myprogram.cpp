@@ -11,7 +11,11 @@
 #include <string>
 #include <vector>
 
+/*******
+A class that inherited from map<string, string> to store variables and values
+ *******/
 class VarMap : public std::map<std::string, std::string> {};
+
 /*****
 A class that has a field of char ** to store arguments.
 Another size_t field stores the number of char * 
@@ -21,7 +25,6 @@ class ArgvContainer {
  public:
   char ** argv;
   size_t n;
-
   // constructor
   ArgvContainer() : argv(NULL), n(0) {}
   ArgvContainer(char **& argv_, size_t n_) : argv(argv_), n(n_) {}
@@ -70,17 +73,7 @@ class ArgvContainer {
 /********
 A class that inherited from std::vector<std::string> for simplicity
  ******/
-class StringVec : public std::vector<std::string> {
-  /*****
-public:
-  virtual ~StringVec() {
-    StringVec::iterator it = begin();
-    while (it != end()) {
-      (*it).clear();
-    }
-  }
-*******/
-};
+class StringVec : public std::vector<std::string> {};
 
 /*****
 Given ECE551PATH (pPath), split it into vector of string
@@ -255,7 +248,12 @@ void backSlashHandler(char *& str) {
   }
 }
 
-// TODO
+/*******
+Given a sourse string which starts with $ and may contain one variable, 
+check with map if the string contains a stored variable right after $ sign.
+Replace $ sign and variable name with the matching value,
+and return the string after replacement.
+ ******/
 std::string searchVar(std::string source, VarMap & map) {
   size_t len = source.length();  // first char in source is $
   size_t trim = 0;
@@ -266,9 +264,6 @@ std::string searchVar(std::string source, VarMap & map) {
     if (it != map.end()) {
       // found the key
       std::string value = it->second;
-      // debug
-      std::cout << "trim = " << trim << "\n";
-      std::cout << "Found value in map: " << value << "\n";
       if (trim > 0) {
         return (value + source.substr(len - trim, trim));
       }
@@ -282,13 +277,15 @@ std::string searchVar(std::string source, VarMap & map) {
   return source;
 }
 
-// TODO
+/*********
+Given a string of argument, replace any stored variable name with its value
+ *******/
 std::string replaceVar(std::string str, VarMap & map) {
   std::string copy(str);
   char * input = &copy[0];
   char * start = input;
   char * dollar;
-
+  // keep searching the string if contains $ sign
   while ((dollar = strchr(start, '$')) != NULL) {
     // find ending
     char * end = dollar + 1;
@@ -302,8 +299,6 @@ std::string replaceVar(std::string str, VarMap & map) {
     // search variable
     size_t len = end - dollar;
     std::string varname = copy.substr(dollar - input, len);
-    //debug
-    std::cout << "search from: " << varname << "\n";
     std::string aftervar = copy.substr(end - input);
     std::string newstr = searchVar(varname, map);
     // doesn't find var in the search string
@@ -313,7 +308,6 @@ std::string replaceVar(std::string str, VarMap & map) {
     }
     size_t newlen = newstr.length();
     size_t beforelen = dollar - input;
-
     if (beforelen > 0) {
       std::string beforevar = copy.substr(0, beforelen);
       copy = beforevar + newstr + aftervar;
@@ -325,8 +319,6 @@ std::string replaceVar(std::string str, VarMap & map) {
     input = &copy[0];
     start = input + newlen + beforelen;
   }
-  //debug
-  std::cout << "After var replace: " << copy << "\n";
   return copy;
 }
 
@@ -353,7 +345,7 @@ void splitArguments(StringVec & vec, std::string inputStr, VarMap & map) {
       //  handle backslashes
       if (len > 1) {
         backSlashHandler(dest);
-        // TODO: replace var
+        // replace var
         std::string newstr = replaceVar(std::string(dest), map);
         delete[] dest;
         vec.push_back(newstr);
@@ -396,7 +388,7 @@ void splitArguments(StringVec & vec, std::string inputStr, VarMap & map) {
     // handle backslashes
     if (len > 1) {
       backSlashHandler(dest);
-      // TODO: replace var
+      // replace var
       std::string newstr = replaceVar(std::string(dest), map);
       delete[] dest;
       vec.push_back(newstr);
@@ -474,7 +466,9 @@ void moveArguments(ArgvContainer & container, StringVec & vec) {
   container.attach(data, n + 1);
 }
 
-// TODO: check: cd set export rev env
+/******
+Check if the input is build in command
+ ******/
 bool isBuildInCommand(std::string command) {
   std::string str(command);
   if (str.compare("cd") == 0 || str.compare("set") == 0 || str.compare("export") == 0 ||
@@ -484,7 +478,10 @@ bool isBuildInCommand(std::string command) {
   return false;
 }
 
-// TODO
+/******
+For build in commands, splits the input string into argument strings
+and store to the given string vector
+ ******/
 void splitCommandArg(StringVec & vec, std::string inputStr) {
   std::string inputcopy(inputStr);
   char * input = &inputcopy[0];
@@ -512,7 +509,10 @@ void splitCommandArg(StringVec & vec, std::string inputStr) {
   delete[] dest;
 }
 
-// TODO
+/********
+Given a string vector that contain all arguments for cd command,
+change the current directory
+ *******/
 int runcd(StringVec & vec) {
   std::string str(vec[1]);
   char * dir = &str[0];
@@ -524,7 +524,10 @@ int runcd(StringVec & vec) {
   return 0;
 }
 
-// TODO
+/*****
+Given the map stores all variables and values, and the key value pair to set,
+insert the pair to map and replace the pair if already exists in map 
+ *****/
 int runset(VarMap & map, std::string key, std::string value) {
   // check if key is valid
   char * c = &key[0];
@@ -550,7 +553,9 @@ int runset(VarMap & map, std::string key, std::string value) {
   return 0;
 }
 
-// TODO
+/********
+Handle all build in commands
+ *******/
 int commandHandler(StringVec & vec, std::string inputStr, VarMap & map) {
   std::string str(vec[0]);
   // cd
@@ -580,8 +585,6 @@ int commandHandler(StringVec & vec, std::string inputStr, VarMap & map) {
       start++;
     }
     std::string value = inputcopy.substr(start);
-    // debug
-    std::cout << "Value: " << value << "\n";
     return runset(map, vec[1], value);
   }
   else if (str.compare("export") == 0) {
@@ -622,6 +625,10 @@ int main(void) {
     std::cout << prompt << currentdir << " $";
     free(currentdir);
     std::getline(std::cin, userinput);
+    // exit if encounters eof
+    if (std::cin.eof()) {
+      break;
+    }
     // trim spaces at the begining
     size_t start = 0;
     while (userinput.at(start) == ' ') {
@@ -634,7 +641,7 @@ int main(void) {
     userinput = userinput.substr(start);
     // exit program if user enter exit or EOF
     // TODO: spaces after exit
-    if (std::cin.eof() || userinput.compare("exit") == 0) {
+    if (userinput.compare("exit") == 0) {
       break;
     }
 
@@ -658,8 +665,7 @@ int main(void) {
       continue;
     }
     // split arguments from user input
-
-    // TODO: replace var
+    // search the map and replace var
     StringVec arguments;
     splitArguments(arguments, userinput, map);
     // debug

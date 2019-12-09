@@ -43,7 +43,6 @@ Test Step 1:
     Program failed with code 1
     , which is correct because there is no such thing to execute, so the child process exits with failure.
 
-
 Test Step 2:
 
 (1) Run ./myprogram < ./testprintargs   aaa     bbb  ccc   dd  \  "ee  ff" \\ ggg  \\\ \"
@@ -127,7 +126,46 @@ Test step 3:
     You will see that it prints nothing, but the next prompt showing "ffosh:/home/jx94/ece551 $", which is correct because the input is a valid cd command, and the program changed directory
     to /home/jx94/ece551 as requested.
     
-   
+(4) Run ./myprogram < set var1
+    You will see that it prints:
+    set: Invalid arguments
+    Command failed
+    , which is correct because for command set, there must be two arguments.
+
+    < set var*1  abc
+    set: Invalid variable name
+    Command failed
+    , which is correct because variable name can only contain letters, numbers and underscores.
+
+    < set   var1    abc
+    < set var2    bags
+    < set   var3    this is a long string
+    < ./testprintargs  $var1  $var2    $var3
+    Print out arguments:
+    Argument 1: ./testprintargs
+    Argument 2: abc
+    Argument 3: bags
+    Argument 4: this is a long string
+    Program was successful
+    , which is correct because all the three variables are set and saved, and any variable name
+    after $ sign is replaced by its value.
+
+    < ./testprintargs  zzz$var1zzz$var2zzz$x$$var3-end
+    Print out arguments:
+    Argument 1: ./testprintargs
+    Argument 2: zzzabczzzbagszzz$x$this is a long string-end
+    Program was successful
+    , which is correct because one argument can contain several variables
+
+    < set var1 another value
+    < ./testprintargs $var1
+    Print out arguments:
+    Argument 1: ./testprintargs
+    Argument 2: another value
+    Program was successful
+    , which is correct because variable value can be replaced by the new value if set multiple
+    times. The value can contain all kind of characters, including space.
+    
     
 
     
