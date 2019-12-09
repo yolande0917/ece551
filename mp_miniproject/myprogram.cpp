@@ -604,7 +604,7 @@ int runrev(VarMap & map, std::string key) {
 }
 
 /******
-TODO
+Print env variables. Always return 0.
  ******/
 int runenv() {
   char ** env;
@@ -615,7 +615,8 @@ int runenv() {
 }
 
 /*******
-TODO
+Export the given variable to env variables.
+Returns 0 if succeeds, -1 if fails
 ******/
 int runexport(VarMap & map, std::string key) {
   // check if key is valid

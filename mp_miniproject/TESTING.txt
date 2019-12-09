@@ -189,5 +189,45 @@ Test step 3:
     , which is correct because before rev, var2 has a value of "bags".
     Then after rev, it becomes "sgab".
 
-    
-    
+(5) Testing export and env:
+    Run ./myprogram < env
+    You will see all environment variables printed, with the last one being ECE551PATH,
+    which has the save value as the default PATH. This is correct because ECE551PATH is
+    initialized and added to environment at the begining of program.
+
+    < set VAR1 to be or not to be
+    < export VAR1
+    < env
+    You will see all environment variables. The last entry is "VAR1=to be or not to be", 
+    which is correct because it is exported to environment.
+
+    < set VAR2 another variable
+    < env
+    You will see the last entry of environment variables is still VAR1, which is correct
+    because although VAR2 is set correctly (the shell doesn't show error), it is not
+    yet exported.
+
+    < export VAR3
+    export: Variable name not found
+    Command failed
+    < export  VAR2 xxx
+    export: Invalid argument
+    Command failed
+    < export VAR**2
+    export: Invalid variable name
+    Command failed
+    This is correct because export should be followed by one argument, and must be a
+    valid variable name. If the variable is not yet set, it should also shows error.
+
+    < set ECE551PATH /usr/local/sbin:/usr/local/bin
+    < env
+    You will see that the value of ECE551PATH in environment variable list has changed
+    as requested. The position of it still remains the same, which means it is still
+    before VAR1. This is correct because everytime we set ECE551PATH to a value, it
+    is exported to environment, and don't require manually export.
+
+    < ffff
+    /usr/local/sbin/ffff: command not found
+    /usr/local/bin/ffff: command not found
+    Program failed with code 1
+    Which is correct because the searching path has already been changed.   
