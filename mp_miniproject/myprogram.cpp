@@ -512,6 +512,7 @@ void splitCommandArg(StringVec & vec, std::string inputStr) {
 /********
 Given a string vector that contain all arguments for cd command,
 change the current directory
+Returns 0 if succeeds, -1 if fails
  *******/
 int runcd(StringVec & vec) {
   std::string str(vec[1]);
@@ -527,6 +528,7 @@ int runcd(StringVec & vec) {
 /*****
 Given the map stores all variables and values, and the key value pair to set,
 insert the pair to map and replace the pair if already exists in map 
+Returns 0 if succeeds, -1 if fails
  *****/
 int runset(VarMap & map, std::string key, std::string value) {
   // check if key is valid
@@ -553,8 +555,52 @@ int runset(VarMap & map, std::string key, std::string value) {
   return 0;
 }
 
+/******
+Reverse the given string
+ *****/
+std::string reverse(std::string input) {
+  std::string output;
+  size_t len = input.length();
+  int i = len - 1;
+  while (i >= 0) {
+    output.append(1, input[i]);
+    i--;
+  }
+  return output;
+}
+
+/*******
+Run the rev command.
+Returns 0 if succeeds, -1 if fails
+ ******/
+int runrev(VarMap & map, std::string key) {
+  // check if key is valid
+  char * c = &key[0];
+  while (*c != '\0') {
+    if (!(isalpha(*c) || isdigit(*c) || *c == '_')) {
+      std::cout << "rev: Invalid variable name\n";
+      return -1;
+    }
+    c++;
+  }
+  // Find the iterator that points to the pair
+  VarMap::iterator it;
+  it = map.find(key);
+  // If not found, print error
+  if (it == map.end()) {
+    std::cout << "rev: Variable name not found\n";
+    return -1;
+  }
+  std::string oldvalue = it->second;
+  map.erase(it);
+  std::string value = reverse(oldvalue);
+  map.insert(std::pair<std::string, std::string>(key, value));
+  return 0;
+}
+
 /********
 Handle all build in commands
+If successfully runs the command, return 0. If fails, return -1
  *******/
 int commandHandler(StringVec & vec, std::string inputStr, VarMap & map) {
   std::string str(vec[0]);
@@ -587,10 +633,18 @@ int commandHandler(StringVec & vec, std::string inputStr, VarMap & map) {
     std::string value = inputcopy.substr(start);
     return runset(map, vec[1], value);
   }
+  // export
   else if (str.compare("export") == 0) {
   }
+  // rev
   else if (str.compare("rev") == 0) {
+    if (vec.size() != 2) {
+      std::cout << "rev: Invalid argument\n";
+      return -1;
+    }
+    return runrev(map, vec[1]);
   }
+  // env
   else if (str.compare("env") == 0) {
   }
   return -1;

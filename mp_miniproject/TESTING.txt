@@ -165,8 +165,29 @@ Test step 3:
     Program was successful
     , which is correct because variable value can be replaced by the new value if set multiple
     times. The value can contain all kind of characters, including space.
+
+    < rev   var1 bbb
+    rev: Invalid argument
+    Command failed
+    < rev   var1*
+    rev: Invalid variable name
+    Command failed
+    <rev  varx
+    rev: Variable name not found
+    Command failed
+    , which is correct because these are the situations when rev command fails.
+    There must be one argument after rev, and it must obey the rule of variable name.
+    If the variable is not set before, it also shows error.
+
     
-    
+    <rev  var2
+    <./testprintargs $var2
+    Print out arguments:
+    Argument 1: ./testprintargs
+    Argument 2: sgab
+    Program was successful
+    , which is correct because before rev, var2 has a value of "bags".
+    Then after rev, it becomes "sgab".
 
     
     
