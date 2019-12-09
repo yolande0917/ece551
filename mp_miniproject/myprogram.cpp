@@ -551,10 +551,23 @@ int runset(VarMap & map, std::string key, std::string value) {
   map.insert(std::pair<std::string, std::string>(key, value));
   // set ECE551PATH in env
   if (key.compare("ECE551PATH") == 0) {
-    // TODO: check if is valid path
+    // check if is valid path
+    char * c = &value[0];
+    while (*c != '\0') {
+      if (!(*c == ':' || *c == '/' || isalpha(*c) || isdigit(*c))) {
+        std::cout << "ECE551PATH: Invalid path\n";
+        return -1;
+      }
+      c++;
+    }
+    // last char
+    c--;
+    if (*c == '/' || *c == ':') {
+      std::cout << "ECE551PATH: Invalid path\n";
+      return -1;
+    }
     std::string mypath = "ECE551PATH=" + value;
     setenv("ECE551PATH", &value[0], 1);
-    //  putenv(&mypath[0]);
   }
 
   return 0;

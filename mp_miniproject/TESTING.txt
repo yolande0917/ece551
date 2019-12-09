@@ -230,4 +230,10 @@ Test step 3:
     /usr/local/sbin/ffff: command not found
     /usr/local/bin/ffff: command not found
     Program failed with code 1
-    Which is correct because the searching path has already been changed.   
+    Which is correct because the searching path has already been changed.
+
+    < set ECE551PATH  \iii*3sff
+    ECE551PATH: Invalid path
+    Command failed
+    Which is correct because the valid path shouldn't contain \ or *. It can only contain
+    / : or letters or numbers, and the last character should not be symbol.
