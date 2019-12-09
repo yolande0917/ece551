@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+extern char ** environ;
+
 /*******
 A class that inherited from map<string, string> to store variables and values
  *******/
@@ -98,7 +100,6 @@ void splitPath(StringVec & vect, char * pPath) {
   strcpy(dest, startptr);
   vect.push_back(std::string(dest));
   delete[] dest;
-  // std::cout << str << std::endl;
 }
 
 /********
@@ -548,8 +549,12 @@ int runset(VarMap & map, std::string key, std::string value) {
   }
   // insert the key value pair
   map.insert(std::pair<std::string, std::string>(key, value));
-  // TODO: set ECE551PATH in env
+  // set ECE551PATH in env
   if (key.compare("ECE551PATH") == 0) {
+    // TODO: check if is valid path
+    std::string mypath = "ECE551PATH=" + value;
+    setenv("ECE551PATH", &value[0], 1);
+    //  putenv(&mypath[0]);
   }
 
   return 0;
@@ -598,6 +603,47 @@ int runrev(VarMap & map, std::string key) {
   return 0;
 }
 
+/******
+TODO
+ ******/
+int runenv() {
+  char ** env;
+  for (env = environ; *env != 0; env++) {
+    std::cout << *env << "\n";
+  }
+  return 0;
+}
+
+/*******
+TODO
+******/
+int runexport(VarMap & map, std::string key) {
+  // check if key is valid
+  char * c = &key[0];
+  while (*c != '\0') {
+    if (!(isalpha(*c) || isdigit(*c) || *c == '_')) {
+      std::cout << "export: Invalid variable name\n";
+      return -1;
+    }
+    c++;
+  }
+  // Find the iterator that points to the pair
+  VarMap::iterator it;
+  it = map.find(key);
+  // If not found, print error
+  if (it == map.end()) {
+    std::cout << "export: Variable name not found\n";
+    return -1;
+  }
+  // export the variable and value to environment
+  std::string value = it->second;
+  std::string myvar = key + "=" + value;
+
+  setenv(&key[0], &value[0], 1);
+
+  return 0;
+}
+
 /********
 Handle all build in commands
 If successfully runs the command, return 0. If fails, return -1
@@ -635,6 +681,11 @@ int commandHandler(StringVec & vec, std::string inputStr, VarMap & map) {
   }
   // export
   else if (str.compare("export") == 0) {
+    if (vec.size() != 2) {
+      std::cout << "export: Invalid argument\n";
+      return -1;
+    }
+    return runexport(map, vec[1]);
   }
   // rev
   else if (str.compare("rev") == 0) {
@@ -646,6 +697,11 @@ int commandHandler(StringVec & vec, std::string inputStr, VarMap & map) {
   }
   // env
   else if (str.compare("env") == 0) {
+    if (vec.size() != 1) {
+      std::cout << "env: Invalid argument\n";
+      return -1;
+    }
+    return runenv();
   }
   return -1;
 }
@@ -657,16 +713,22 @@ int main(void) {
   VarMap map;
   char * pPath;
   pPath = getenv("PATH");
-  if (pPath != NULL) {
-    std::cout << "ECE551PATH is: " << pPath << std::endl;
+  if (pPath == NULL) {
+    std::cout << "Error: PATH not found in environment variables.\n";
+    return EXIT_FAILURE;
   }
   map.insert(std::pair<std::string, std::string>("ECE551path", pPath));
-  // TODO: put ECE551PATH into env
+  // put ECE551PATH into env
+  std::string mypath = "ECE551PATH=" + std::string(pPath);
+  putenv(&mypath[0]);
 
   while (1) {
-    //debug
-    std::cout << "Map size = " << map.size() << "\n";
-
+    // update path in the begining of each loop
+    pPath = getenv("ECE551PATH");
+    if (pPath == NULL) {
+      std::cout << "Error: ECE551PATH not found in environment variables.\n";
+      break;
+    }
     // repeat displaying the prompt and reading user input
     // show current directory and prompt
     char * currentdir = get_current_dir_name();
@@ -699,13 +761,9 @@ int main(void) {
       break;
     }
 
-    // TODO: build in commands: cd set export rev env
+    // build in commands: cd set export rev env
     StringVec commandargs;
     splitCommandArg(commandargs, userinput);
-    // debug
-    for (size_t i = 0; i < commandargs.size(); i++) {
-      std::cout << commandargs[i] << "\n";
-    }
     if (isBuildInCommand(commandargs[0])) {
       // TODO: handle build in commands
       if (commandHandler(commandargs, userinput, map) == -1) {
@@ -722,10 +780,6 @@ int main(void) {
     // search the map and replace var
     StringVec arguments;
     splitArguments(arguments, userinput, map);
-    // debug
-    for (size_t i = 0; i < arguments.size(); i++) {
-      std::cout << arguments[i] << std::endl;
-    }
     // create a class to contain arguments
     ArgvContainer container;
     moveArguments(container, arguments);
