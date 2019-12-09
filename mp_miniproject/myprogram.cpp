@@ -770,7 +770,6 @@ int main(void) {
     }
     userinput = userinput.substr(start);
     // exit program if user enter exit or EOF
-    // TODO: spaces after exit
     if (userinput.compare("exit") == 0) {
       break;
     }
@@ -779,7 +778,7 @@ int main(void) {
     StringVec commandargs;
     splitCommandArg(commandargs, userinput);
     if (isBuildInCommand(commandargs[0])) {
-      // TODO: handle build in commands
+      // handle build in commands
       if (commandHandler(commandargs, userinput, map) == -1) {
         std::cout << "Command failed\n";
       }

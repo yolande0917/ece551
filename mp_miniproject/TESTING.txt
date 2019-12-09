@@ -20,7 +20,8 @@ Test Step 1:
     , which is correct because testfail prints the first line of text and then it exits with code 2.
 
 (4) Run ./myprogram < exit
-    You will see that the shell exits, which is correct because the shell should exit if user types that command.
+    You will see that the shell exits, which is correct because the shell should exit if user types that command. Note that there can be spaces before "exit", but not after. If any spaces
+    is typed after exit, this is not a valid exit command.
 
 (5) Run ./myprogram < ctrl-d
     You will see that the shell exits, which is correct because the shell should exit if it encountered EOF, which is typed in ctrl-d.
